@@ -29,14 +29,15 @@ jobs:
     timeout-minutes: 20
     steps:
       # The runner's own client is older than the server, and pg_dump refuses
-      # a server newer than itself. PGDG's script adds the repository.
-      - name: Install the Postgres 17 client
+      # a server newer than itself. Neon runs Postgres 18. PGDG's script adds
+      # the repository.
+      - name: Install the Postgres 18 client
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y -qq postgresql-client-17
+          sudo apt-get install -y -qq postgresql-client-18
 
       # The secret is Neon's string as given (postgresql://…?sslmode=…), which
       # pg_dump takes as it is. The app's own form (postgresql+asyncpg://…
@@ -60,7 +61,7 @@ jobs:
           url="${url/&ssl=/&sslmode=}"
           day="$(date -u +%F)"
           out="spica-$day.dump.gpg"
-          /usr/lib/postgresql/17/bin/pg_dump --format=custom --dbname="$url" \
+          /usr/lib/postgresql/18/bin/pg_dump --format=custom --dbname="$url" \
             | gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
                   --passphrase-fd 3 --output "$out" 3<<<"$BACKUP_PASSPHRASE"
           # A backup that does not decrypt into a readable archive is not one.
@@ -68,7 +69,7 @@ jobs:
           # the end rather than stopping where pg_restore's listing did.
           gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 3 --decrypt "$out" \
               3<<<"$BACKUP_PASSPHRASE" \
-            | { /usr/lib/postgresql/17/bin/pg_restore --list > /dev/null && cat > /dev/null; }
+            | { /usr/lib/postgresql/18/bin/pg_restore --list > /dev/null && cat > /dev/null; }
           echo "$out: $(du -h "$out" | cut -f1)"
           echo "file=$out" >> "$GITHUB_OUTPUT"
 

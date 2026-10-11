@@ -22,7 +22,7 @@ the owner every day, and there is no money for hosting.
 | Piece | Where | Plan |
 |---|---|---|
 | API — FastAPI, the MCP server and OAuth, one ASGI app | **Vercel**, project root `backend/` | Hobby. One Fluid function in `sin1` (Singapore), up to 300 s a request |
-| Postgres 17 | **Neon**, AWS Singapore (`aws-ap-southeast-1`) | Free. Compute fixed at 0.25 CU; scales to zero after 5 minutes |
+| Postgres 18 (the laptop runs 17; the migrations run on both) | **Neon**, AWS Singapore (`aws-ap-southeast-1`) | Free. Compute fixed at 0.25 CU; scales to zero after 5 minutes |
 | Migrations, then the exercise library | Vercel's build step on the API project | `alembic upgrade head`, then `data/workouts/exercises.csv` loaded (idempotent on name); production builds only |
 | The schedules tick — `scripts/run_due.py` | **GitHub Actions**, private repo | Free. Hourly at minute 35 UTC (:05 past each hour IST) |
 | Web app — landing at `/`, the app at `/app`, `/connect`, `/film` | **Vercel**, second project, root `frontend/` | Hobby, static, every path rewritten to `index.html` |

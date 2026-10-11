@@ -94,7 +94,7 @@ token sent to them.
      then every run fails and GitHub emails each one. Step 12 turns them on.
 2. **Vercel account.** Sign up with GitHub, Hobby. Before anything deploys:
    Team Settings → Data Preferences → opt out of AI model training.
-3. **Neon.** Sign up with GitHub and create a project: Postgres **17**, AWS
+3. **Neon.** Sign up with GitHub and create a project: Postgres **18** (Neon's default; the laptop runs 17, and the migrations run on both), AWS
    **Singapore** (`aws-ap-southeast-1`), compute **0.25 to 0.25** CU, scale to
    zero left on. Connect → **connection pooling off** → copy the **direct**
    string (no `-pooler` in the host). It goes in as given, `sslmode` and all.
@@ -111,7 +111,7 @@ token sent to them.
    is not the one `PUBLIC_URL` was given, fix `PUBLIC_URL` and redeploy.
    Deployment Protection stays on Standard.
 6. **Check it.** In a private window, `https://<api>.vercel.app/health` says
-   `"status": "ok"`, Postgres 17, and `vector`, `pg_trgm`, `unaccent` among
+   `"status": "ok"`, Postgres 18, and `vector`, `pg_trgm`, `unaccent` among
    the extensions. `curl -sI https://<api>.vercel.app/health` shows an
    `x-vercel-id` header naming `sin1`: the function runs in Singapore, so
    `vercel.json` made it into the commit. Until both hold, that address goes
