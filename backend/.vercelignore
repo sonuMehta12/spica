@@ -8,7 +8,11 @@
 .env.*
 deploy.env
 # Personal rows and the eval runs made from them; vercel.json's excludeFiles
-# also keeps them out of the function.
-data/
+# also keeps them out of the function. Only the personal folders: the build
+# reads data/workouts/exercises.csv, the exercise library, which is nobody's.
+data/diet/
+data/dishes/
+data/memory/
+data/work/
 evals/reports/
 .venv/
