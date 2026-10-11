@@ -1,0 +1,1607 @@
+/*
+ * The landing page. Theme: Jamun — THEME.md.
+ *
+ * Full width and responsive, unlike the app's phone-width shell. Every colour
+ * and font is a variable set from theme.ts on `.lp` (landing/parts.tsx), so
+ * nothing here names a colour of its own. Motion is CSS and one clock in the
+ * film; nothing here is a dependency.
+ *
+ * The app's rules hold here too: one brand colour, used sparingly — the
+ * primary button, your words, the current selection; mode colours on data
+ * only; nothing that sits in the page casts a shadow; the serif is the voice.
+ * A landing page may be louder than the app in one way only: size.
+ */
+
+/* The page is its own scroll container: html and body stay overflow:hidden
+   for the app shell, and the landing must not change them. */
+.lp {
+  /* One vertical rhythm for every section, on the 4px grid; the app's radii —
+     14 for small cards, 18 for panels, full for pills. The page reads as
+     composed when nothing is a one-off. */
+  --sec: clamp(96px, 11vw, 160px);
+  --radius: 18px;
+  --radius-sm: 14px;
+  --hair: 1px solid var(--line);
+
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  font-variant-numeric: lining-nums tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
+.lp *,
+.lp *::before,
+.lp *::after {
+  box-sizing: border-box;
+}
+
+/* :where() keeps this at zero specificity, so a button's own colour wins. */
+.lp :where(a) {
+  color: inherit;
+}
+
+.lp ::selection {
+  background: var(--brand-tint);
+}
+
+.lp-wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* ── reveal ─────────────────────────────────────────────── */
+
+.rv {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 1s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.rv.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── type ───────────────────────────────────────────────── */
+
+/* A label: sentence case, in the label grey. No caps, no tracking. */
+.lp-eyebrow {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--faint);
+}
+
+.lp-h1 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  /* Sized by its column, not the window: "Money, food, work." is 8.04 times
+     its font size wide in Newsreader, so 12cqi keeps it one line at every
+     width. */
+  font-size: clamp(34px, 12cqi, 104px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.lp-h2 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(36px, 4.4vw, 60px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 16px 0 0;
+  text-wrap: balance;
+}
+
+/* The words a heading leans on: the serif's italic, in ink — weight by
+   letterform, not by colour. */
+.lp-em {
+  font-style: italic;
+}
+
+.lp-lede {
+  font-size: clamp(17px, 1.35vw, 19px);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 30em;
+  margin: 24px 0 0;
+  text-wrap: pretty;
+}
+
+/* ── buttons ────────────────────────────────────────────── */
+
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--f-sans);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+.lp-btn-primary {
+  background: var(--brand);
+  color: var(--white);
+}
+
+.lp-btn-primary:hover {
+  background: var(--brand-hover);
+}
+
+.lp-btn-ghost {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+.lp-btn-ghost:hover {
+  background: var(--surface);
+}
+
+/* ── nav ────────────────────────────────────────────────── */
+
+.lp-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--paper);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s;
+}
+
+.lp-nav.scrolled {
+  border-bottom-color: var(--line);
+}
+
+.lp-nav .lp-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+/* The wordmark: lowercase, Anek Latin semibold — THEME.md § Type. */
+.lp-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-sans);
+  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+}
+
+.lp-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.lp-nav-links a {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.lp-nav-links a:hover {
+  color: var(--ink);
+}
+
+.lp-nav .lp-btn {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+/* ── hero ───────────────────────────────────────────────── */
+
+.lp-hero {
+  position: relative;
+  padding: clamp(56px, 8vw, 112px) 0 var(--sec);
+  overflow: hidden;
+}
+
+.lp-hero .lp-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+}
+
+/* The headline sizes itself from this column (container units). */
+.lp-hero-copy {
+  container-type: inline-size;
+}
+
+.lp-hero-copy .lp-lede {
+  margin-top: 28px;
+}
+
+.lp-hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+/* Plain spacing, no separators: a wrapped line can never start on a dot. */
+.lp-hero-meta {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 14px;
+  color: var(--faint);
+}
+
+.lp-hero-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* One flat disc of the surface behind the phone — somewhere for it to sit,
+   not a glow. */
+.lp-halo {
+  position: absolute;
+  width: 112%;
+  aspect-ratio: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--surface);
+  pointer-events: none;
+}
+
+/* ── phone ──────────────────────────────────────────────── */
+
+/* A device, drawn: its corners are the hardware's, not the page's radii. */
+.lp-phone {
+  position: relative;
+  z-index: 2;
+  width: min(332px, 78vw);
+  aspect-ratio: 9 / 18.6;
+  border-radius: 48px;
+  background: var(--ink);
+  padding: 12px;
+}
+
+.lp-phone-notch {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 88px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--ink);
+  z-index: 3;
+}
+
+.lp-phone-screen {
+  position: relative;
+  height: 100%;
+  border-radius: 36px;
+  background: var(--paper);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The hero's phone holds the real app, laid out at a phone's width and zoomed
+   to fit (RealDeck.tsx) — a touch larger than a drawn one, so it reads. */
+.lp-phone.real {
+  width: min(352px, 84vw);
+  aspect-ratio: 9 / 18.4;
+}
+
+/* ── the app's pieces ───────────────────────────────────── */
+
+/* Your words: a pill in the brand's tint, ink on it, the tail bottom right. */
+.lp-said {
+  align-self: flex-end;
+  max-width: 82%;
+  background: var(--brand-tint);
+  color: var(--ink);
+  border-radius: 18px 18px 4px 18px;
+  padding: 8px 16px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+/* The agent's words: the serif, the thread's full width — no bubble, no face.
+   The type already says who is speaking. */
+.lp-agent-says {
+  font-family: var(--f-display);
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+/* A write that happened, then what the agent says about it. */
+.lp-turn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* A small card in the thread: white and a hairline. */
+.lp-log {
+  background: var(--white);
+  border: var(--hair);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+
+.lp-log-h {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--faint);
+  margin-bottom: 4px;
+}
+
+.lp-log-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 4px 0;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.lp-log-k {
+  font-size: 14px;
+  color: var(--faint);
+}
+
+.lp-log-v {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.lp-ring {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.lp-ring svg {
+  display: block;
+}
+
+.lp-ring-in {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* The figure a ring carries is the serif at hero size; its label, grey. */
+.lp-ring-big {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  transition: color 0.4s;
+}
+
+.lp-ring-small {
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.lp-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.lp-wave i {
+  display: block;
+  width: 4px;
+  height: 60%;
+  border-radius: 999px;
+  background: var(--brand);
+  animation: lp-wave 1s ease-in-out infinite;
+}
+
+@keyframes lp-wave {
+  50% {
+    height: 18%;
+  }
+}
+
+/* Chips are yours, not the brand's: white with a border, a brand wash on
+   hover. The one just tapped is the selection, so it takes the brand. */
+.lp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--chip-border);
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--ink);
+  font-family: var(--f-sans);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    transform 0.3s,
+    background 0.3s,
+    border-color 0.3s,
+    color 0.3s;
+}
+
+button.lp-chip {
+  cursor: pointer;
+}
+
+button.lp-chip:hover {
+  background: var(--chip-hover);
+}
+
+.lp-chip small {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--faint);
+}
+
+.lp-chip.tapped {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--white);
+  transform: scale(1.04);
+}
+
+.lp-chip.tapped small {
+  color: var(--white);
+}
+
+/* ── the hero phone's loop ──────────────────────────────── */
+
+.lp-demo-thread {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.lp-demo-step {
+  animation: lp-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1.2) both;
+}
+
+@keyframes lp-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+/* The composer: a field on the page — white and a border, no lift. */
+.lp-demo-composer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 0 4px 0 16px;
+  font-size: 14px;
+  color: var(--faint);
+}
+
+.lp-demo-mic {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-demo-mic .lp-wave i {
+  background: var(--white);
+  width: 2.5px;
+}
+
+/* ── the drain ──────────────────────────────────────────── */
+
+.lp-drain {
+  padding: 36px 0;
+  border-top: var(--hair);
+  border-bottom: var(--hair);
+  overflow: hidden;
+  display: grid;
+  gap: 12px;
+  /* The strips fade in and out at the edges rather than being cut by them. */
+  mask-image: linear-gradient(to right, transparent, var(--ink) 12%, var(--ink) 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, var(--ink) 12%, var(--ink) 88%, transparent);
+}
+
+.lp-marquee {
+  display: flex;
+  width: max-content;
+  gap: 12px;
+  animation: lp-marquee 80s linear infinite;
+}
+
+.lp-marquee.back {
+  animation-direction: reverse;
+  animation-duration: 96s;
+}
+
+@keyframes lp-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.lp-spend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--white);
+  border: var(--hair);
+  white-space: nowrap;
+}
+
+.lp-spend b {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+/* Each mode's own colour on its own data — the dot in the base, the value in
+   the ink — and money out in red, as it is in the app. */
+.lp-spend span {
+  font-size: 13px;
+  color: var(--red);
+}
+
+.lp-spend.food span {
+  color: var(--diet-ink);
+}
+
+.lp-spend.work span {
+  color: var(--work-ink);
+}
+
+.lp-spend::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--paisa);
+  flex: 0 0 auto;
+}
+
+.lp-spend.food::before {
+  background: var(--diet);
+}
+
+.lp-spend.work::before {
+  background: var(--work);
+}
+
+/* ── the film ───────────────────────────────────────────── */
+
+.lp-film-sec {
+  background: var(--ink);
+  color: var(--paper);
+  padding: clamp(80px, 9vw, 128px) 0;
+}
+
+.lp-film-sec .lp-eyebrow,
+.lp-film-sec .lp-lede {
+  color: color-mix(in srgb, var(--paper) 62%, transparent);
+}
+
+.lp-film-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 44px;
+}
+
+.lp-film-head .lp-h2 {
+  margin: 0;
+}
+
+/* The stage: 16:9 on a laptop, 4:5 on a phone. Scenes size themselves from
+   it (Film.tsx measures it), so the same film is right at either shape. */
+.lp-film {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  user-select: none;
+}
+
+.lp-film.bleed {
+  aspect-ratio: auto;
+  height: 100%;
+  border-radius: 0;
+}
+
+.lp-scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lp-film-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.lp-film-toggle {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-film-track {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+}
+
+.lp-film-seg {
+  flex: var(--w);
+  height: 4px;
+  border: none;
+  padding: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 18%, transparent);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-film-seg i {
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  transform-origin: left;
+}
+
+.lp-film-seg:hover {
+  background: color-mix(in srgb, var(--paper) 30%, transparent);
+}
+
+/* On the film while the browser holds the sound: the one word it needs. */
+.lp-film-unmute {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.lp-film-sound {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 16px 0 12px;
+  border-radius: 999px;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--paper) 14%, transparent);
+  color: var(--paper);
+  font-family: var(--f-sans);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.lp-film-sound:hover {
+  background: color-mix(in srgb, var(--paper) 24%, transparent);
+}
+
+.lp-film-sound.on {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.lp-film-label {
+  flex: 0 0 auto;
+  min-width: 9em;
+  text-align: right;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--paper) 62%, transparent);
+}
+
+/* ── chapters ───────────────────────────────────────────── */
+
+.lp-chapter {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+}
+
+.lp-chapter .lp-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(48px, 7vw, 112px);
+  align-items: center;
+}
+
+.lp-chapter.flip .lp-wrap {
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+}
+
+.lp-chapter.flip .lp-copy {
+  order: 2;
+}
+
+/* A chapter is keyed to its mode the way the app's tabs are: the word in
+   ink, a short underline in the mode's colour — the one place a mode colour
+   touches anything but data. */
+.lp-chapter-n {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--faint);
+}
+
+.lp-mode {
+  position: relative;
+  padding-bottom: 8px;
+  color: var(--ink);
+}
+
+/* The app's own tab mark (ModeDeck): 16 by 2, centred under the word. */
+.lp-mode::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 16px;
+  height: 2px;
+  margin-left: -8px;
+  border-radius: 1px;
+  background: var(--m, var(--ink));
+}
+
+.lp-mode.paisa {
+  --m: var(--paisa);
+}
+
+.lp-mode.diet {
+  --m: var(--diet);
+}
+
+.lp-mode.work {
+  --m: var(--work);
+}
+
+/* The visitor's own words, set as a pull quote — editorial, not a UI card. */
+.lp-problem {
+  margin-top: 36px;
+  padding-left: 20px;
+  border-left: 2px solid var(--brand-soft);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.lp-problem q {
+  display: block;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(20px, 1.7vw, 24px);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  quotes: '“' '”';
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
+
+/* One panel for every demo: white and a hairline. No lift. */
+.lp-panel {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--white);
+  border: var(--hair);
+  padding: clamp(24px, 3vw, 36px);
+}
+
+/* The surface panel, for a panel whose insides are white cards. */
+.lp-panel.tint {
+  background: var(--surface);
+  border-color: transparent;
+}
+
+/* money */
+.lp-money-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.lp-money-try {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lp-money-status {
+  margin-top: 12px;
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--muted);
+}
+
+.lp-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--brand);
+  font: inherit;
+  cursor: pointer;
+}
+
+.lp-link:hover {
+  color: var(--brand-hover);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.lp-bars {
+  margin-top: 28px;
+  display: grid;
+  gap: 12px;
+}
+
+.lp-bars .lp-eyebrow {
+  margin-bottom: 4px;
+}
+
+.lp-bar-row {
+  display: grid;
+  grid-template-columns: 7.5em minmax(0, 1fr) 5.5em;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.lp-bar-row span:last-child {
+  text-align: right;
+  color: var(--muted);
+}
+
+.lp-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+/* One series — spend by category — so one colour; the labels say which. */
+.lp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--paisa);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.in .lp-bar i {
+  transform: scaleX(var(--f));
+}
+
+.lp-udhaar {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 15px;
+}
+
+.lp-udhaar b {
+  font-weight: 500;
+}
+
+.lp-udhaar span {
+  font-size: 13px;
+  color: var(--faint);
+}
+
+/* food */
+.lp-days {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.lp-day {
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: var(--hair);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 332px;
+}
+
+.lp-day-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.lp-day-h b {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.01em;
+}
+
+.lp-day-h span {
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.lp-day .lp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.lp-day .lp-chip {
+  height: 32px;
+  font-size: 13px;
+  padding: 0 12px;
+}
+
+.lp-day .lp-chip small {
+  font-size: 12px;
+}
+
+.lp-typed {
+  margin-top: auto;
+  height: 40px;
+  border-radius: 999px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--ink);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.lp-hint {
+  color: var(--faint);
+}
+
+.lp-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 16px;
+  background: var(--brand);
+  margin-left: 2px;
+  animation: lp-blink 1s steps(2) infinite;
+}
+
+@keyframes lp-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.lp-not {
+  margin-top: 24px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+/* work: the pipeline (Pipeline.tsx) */
+.lp-pipe-panel {
+  padding: clamp(20px, 2.6vw, 32px);
+}
+
+.lp-pipe {
+  position: relative;
+}
+
+.lp-pipe-svg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.lp-pipe-line {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+.lp-pipe-line.soon {
+  stroke-dasharray: 4 4;
+}
+
+.lp-pipe-packet {
+  stroke: var(--white);
+  stroke-width: 2;
+}
+
+.lp-pipe-sources {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.lp-pipe-src {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.lp-pipe-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: var(--hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+
+/* A ring in the source's colour as it sends — an outline, not a lift. */
+.lp-pipe-src.emit .lp-pipe-logo {
+  transform: translateY(-4px) scale(1.06);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tint) 22%, transparent);
+}
+
+.lp-pipe-src b {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.lp-pipe-src.soon .lp-pipe-logo {
+  opacity: 0.55;
+  filter: grayscale(0.6);
+}
+
+.lp-pipe-hubrow {
+  position: relative;
+  margin-top: clamp(92px, 12vw, 132px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-pipe-hub {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--white);
+  border: var(--hair);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-pipe-hublabel {
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.lp-pipe-list {
+  position: relative;
+  margin-top: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  border: var(--hair);
+  padding: 12px 16px 8px;
+  min-height: 252px;
+}
+
+.lp-pipe-list-h {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--faint);
+  margin-bottom: 4px;
+}
+
+.lp-pipe-empty {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--faint);
+}
+
+.lp-pipe-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line-soft);
+  padding: 4px 0;
+}
+
+.lp-pipe-row:first-of-type {
+  border-top: none;
+}
+
+.lp-pipe-row-mark {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lp-pipe-row-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── the results, in numbers ─────────────────────────────── */
+
+.lp-results {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+}
+
+/* An editorial row: three figures between hairlines, not three cards. */
+.lp-results-grid {
+  margin-top: clamp(48px, 6vw, 72px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: var(--hair);
+}
+
+.lp-result {
+  padding: 28px 32px 4px 0;
+}
+
+.lp-result + .lp-result {
+  padding-left: 32px;
+  border-left: var(--hair);
+}
+
+.lp-result b {
+  display: block;
+  margin-top: 24px;
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(64px, 8.4vw, 120px);
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.lp-result p {
+  margin: 16px 0 0;
+  max-width: 14em;
+  font-size: clamp(16px, 1.3vw, 18px);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ── AI-powered tracking and logging ─────────────────────── */
+
+.lp-ai {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+}
+
+.lp-ai .lp-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(48px, 7vw, 112px);
+  align-items: center;
+}
+
+.lp-ai-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The dropdown: a native <details>, drawn as one quiet line that opens. */
+.lp-how {
+  margin-top: 32px;
+  border-top: var(--hair);
+  border-bottom: var(--hair);
+}
+
+.lp-how summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.lp-how summary::-webkit-details-marker {
+  display: none;
+}
+
+.lp-how summary svg {
+  flex: 0 0 auto;
+  transition: transform 0.25s;
+}
+
+.lp-how[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.lp-how-body {
+  padding: 0 0 20px;
+}
+
+.lp-how-body p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 34em;
+}
+
+.lp-how-body b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ── one conversation ───────────────────────────────────── */
+
+.lp-convo {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+}
+
+.lp-convo-grid {
+  margin-top: clamp(48px, 6vw, 72px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lp-ex {
+  border-radius: var(--radius);
+  background: var(--white);
+  border: var(--hair);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── everywhere ─────────────────────────────────────────── */
+
+.lp-where {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+}
+
+.lp-where-grid {
+  margin-top: clamp(48px, 6vw, 72px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.lp-surface {
+  border-radius: var(--radius);
+  background: var(--white);
+  border: var(--hair);
+  padding: 24px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lp-surface-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+}
+
+.lp-surface b {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.lp-surface p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* Built reads in ink on the surface; coming is quieter, only outlined. */
+.lp-tag {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 2px 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.lp-tag.soon {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--faint);
+}
+
+/* ── the close ──────────────────────────────────────────── */
+
+.lp-close {
+  padding: var(--sec) 0;
+  border-top: var(--hair);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-formula {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(48px, 7.2vw, 104px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 32px 0 0;
+}
+
+.lp-formula span {
+  display: block;
+}
+
+.lp-close .lp-lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.lp-close .lp-hero-ctas {
+  justify-content: center;
+}
+
+.lp-foot {
+  border-top: var(--hair);
+  padding: 28px 0 44px;
+  font-size: 13px;
+  color: var(--faint);
+}
+
+.lp-foot .lp-wrap {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* ── narrower screens ───────────────────────────────────── */
+
+@media (max-width: 980px) {
+  .lp-nav-links a:not(.lp-btn) {
+    display: none;
+  }
+
+  .lp-hero .lp-wrap,
+  .lp-chapter .lp-wrap,
+  .lp-chapter.flip .lp-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-chapter.flip .lp-copy {
+    order: 0;
+  }
+
+  .lp-convo-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-ai .lp-wrap {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-where-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lp-film {
+    aspect-ratio: 4 / 5;
+  }
+
+  .lp-film-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .lp {
+    --sec: 88px;
+  }
+
+  .lp-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-result,
+  .lp-result + .lp-result {
+    padding: 24px 0 28px;
+    border-left: none;
+    border-bottom: var(--hair);
+  }
+
+  .lp-wrap {
+    padding: 0 20px;
+  }
+
+  .lp-where-grid,
+  .lp-days {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lp-pipe-sources {
+    gap: 4px;
+  }
+
+  .lp-pipe-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .lp-pipe-logo svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .lp-pipe-src b {
+    font-size: 11px;
+  }
+
+  .lp-film-label {
+    display: none;
+  }
+
+  .lp-film-sound {
+    padding: 0 12px;
+  }
+
+  .lp-film-sound span {
+    display: none;
+  }
+
+  .lp-btn {
+    padding: 0 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp *,
+  .lp *::before,
+  .lp *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+
+  .rv {
+    opacity: 1;
+    transform: none;
+  }
+}

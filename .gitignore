@@ -1,0 +1,28 @@
+# ── Secrets ───────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+# The filled copy of backend/deploy.env.example: the hosted database and the key.
+deploy.env
+
+# ── Python ────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# ── Node ──────────────────────────────────────────────────────────────────
+node_modules/
+dist/
+*.tsbuildinfo
+
+# ── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+*.log
+
+# Personal rows — dev scaffolding only, never in the repository (production starts empty)
+backend/data/diet/
+backend/data/dishes/
+backend/data/memory/
+backend/data/work/

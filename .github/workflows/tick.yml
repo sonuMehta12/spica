@@ -1,0 +1,55 @@
+# The schedules tick: backend/scripts/run_due.py, once an hour.
+# spec/in-progress/deploy.md § The tick is hourly.
+#
+# Hourly, not every five minutes: Neon's compute sleeps five minutes after the
+# last query and every tick wakes it, so a five-minute tick would keep it awake
+# all month — past the free plan's hours. Every job's grace window is hours
+# wide, so each still gets three or four tries.
+#
+# There is no tick route on the API: the script runs here with the database URL
+# and the model key as repo secrets. "Run workflow" on the Actions tab runs it
+# by hand.
+
+name: tick
+
+on:
+  schedule:
+    - cron: "35 * * * *"        # :35 UTC is :05 past each hour in IST
+  workflow_dispatch:
+
+# Two ticks never overlap: a second one waits for the first to finish.
+concurrency:
+  group: tick
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+
+      # setup-uv publishes no floating major tag, so the release is pinned.
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+
+      - run: uv sync --frozen --no-dev
+
+      # Quiet: what ran and how many, never what it found. GitHub keeps this
+      # log for months, and a nudge's line or a payment's lede would outlive
+      # the row it quoted. The log's retention is not shortened instead: the
+      # same setting caps the backup's artifact.
+      - name: Run what is due
+        run: PYTHONPATH=. uv run --no-sync python scripts/run_due.py --quiet
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96"
+     class="spica-mascot" data-state="idle" role="img" aria-label="Spica">
+  <title>Spica</title>
+
+  <!-- The Constellation, standalone: the same mark and states as Mascot.tsx
+       and the `.cx-mascot` rules in global.css. A file on its own cannot read
+       theme.ts, so the brand (Jamun) is written in here as its value. -->
+  <style>
+    .spica-mascot .core { transform-box: fill-box; transform-origin: center; }
+
+    /* idle — the centre breathes, and nothing else moves */
+    .spica-mascot[data-state="idle"] .core { animation: cm-breathe 2.5s ease-in-out infinite alternate; }
+    @keyframes cm-breathe { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+    /* thinking — the outer dots dim in turn, clockwise from the top */
+    .spica-mascot[data-state="thinking"] .dot { animation: cm-pulse 1.2s ease-in-out var(--delay) infinite both; }
+    @keyframes cm-pulse { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+
+    /* listening — the outer dots drift out along their spokes, 6%, and back */
+    .spica-mascot[data-state="listening"] .dot { animation: cm-drift .95s ease-in-out infinite alternate; }
+    @keyframes cm-drift { to { transform: translate(calc(var(--dx) * .06), calc(var(--dy) * .06)); } }
+
+    /* saving / done — draw in, spring back out past their place, settle */
+    .spica-mascot[data-state="saving"] .dot,
+    .spica-mascot[data-state="done"] .dot { animation: cm-beat .6s both; }
+    @keyframes cm-beat {
+      0%     { transform: translate(0, 0); animation-timing-function: ease-in; }
+      30%    { transform: translate(calc(var(--dx) * -.25), calc(var(--dy) * -.25)); animation-timing-function: ease-out; }
+      63.33% { transform: translate(calc(var(--dx) * .08), calc(var(--dy) * .08)); animation-timing-function: ease-in-out; }
+      100%   { transform: translate(0, 0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spica-mascot * { animation: none !important; }
+    }
+  </style>
+
+  <g fill="#732F67">
+    <!-- mid dots on the axes, clockwise from the top; each diagonal follows the mid dot before it -->
+    <circle class="dot" cx="48" cy="20" r="6"   style="--dx:0px;--dy:-28px;--delay:0s"/>
+    <circle class="dot" cx="68" cy="28" r="3.5" style="--dx:20px;--dy:-20px;--delay:.15s"/>
+    <circle class="dot" cx="76" cy="48" r="6"   style="--dx:28px;--dy:0px;--delay:.3s"/>
+    <circle class="dot" cx="68" cy="68" r="3.5" style="--dx:20px;--dy:20px;--delay:.45s"/>
+    <circle class="dot" cx="48" cy="76" r="6"   style="--dx:0px;--dy:28px;--delay:.6s"/>
+    <circle class="dot" cx="28" cy="68" r="3.5" style="--dx:-20px;--dy:20px;--delay:.75s"/>
+    <circle class="dot" cx="20" cy="48" r="6"   style="--dx:-28px;--dy:0px;--delay:.9s"/>
+    <circle class="dot" cx="28" cy="28" r="3.5" style="--dx:-20px;--dy:-20px;--delay:1.05s"/>
+    <circle class="core" cx="48" cy="48" r="10"/>
+  </g>
+</svg>

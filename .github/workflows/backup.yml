@@ -1,0 +1,81 @@
+# The weekly backup: the whole database, encrypted, kept 30 days.
+# spec/in-progress/deploy.md § Rules and edge cases.
+#
+# Neon's free plan keeps six hours of history and no backups, so this is the
+# backup. It is restore-only — encrypted with a passphrase only the owner holds,
+# kept where only the owner can read it — which CLAUDE.md allows; it is not an
+# export. To restore, download the artifact — GitHub hands it over zipped —
+# unzip it, and:
+#
+#   gpg --decrypt spica-<day>.dump.gpg | pg_restore --no-owner --dbname "<libpq URL>"
+
+name: backup
+
+on:
+  schedule:
+    - cron: "30 21 * * 6"       # Saturday 21:30 UTC is Sunday 03:00 IST
+  workflow_dispatch:
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # The runner's own client is older than the server, and pg_dump refuses
+      # a server newer than itself. PGDG's script adds the repository.
+      - name: Install the Postgres 17 client
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y -qq postgresql-client-17
+
+      # The secret is Neon's string as given (postgresql://…?sslmode=…), which
+      # pg_dump takes as it is. The app's own form (postgresql+asyncpg://…
+      # ?ssl=…) works too: it is turned back into libpq's. bash 5.2 reads an
+      # `&` in a replacement as the match, so that is switched off first.
+      # Piped straight into gpg, so the plain dump never touches the disk.
+      # Nothing here prints the URL or the passphrase: the passphrase goes in
+      # on a file descriptor, never on a command line.
+      - name: Dump and encrypt
+        id: dump
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          shopt -u patsub_replacement 2>/dev/null || true
+          test -n "$DATABASE_URL" || { echo "::error::DATABASE_URL secret is empty"; exit 1; }
+          test -n "$BACKUP_PASSPHRASE" || { echo "::error::BACKUP_PASSPHRASE secret is empty"; exit 1; }
+          url="${DATABASE_URL/#postgresql+asyncpg:\/\//postgresql://}"
+          url="${url/\?ssl=/?sslmode=}"
+          url="${url/&ssl=/&sslmode=}"
+          day="$(date -u +%F)"
+          out="spica-$day.dump.gpg"
+          /usr/lib/postgresql/17/bin/pg_dump --format=custom --dbname="$url" \
+            | gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
+                  --passphrase-fd 3 --output "$out" 3<<<"$BACKUP_PASSPHRASE"
+          # A backup that does not decrypt into a readable archive is not one.
+          # The rest is read through too, so gpg checks the integrity tag at
+          # the end rather than stopping where pg_restore's listing did.
+          gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 3 --decrypt "$out" \
+              3<<<"$BACKUP_PASSPHRASE" \
+            | { /usr/lib/postgresql/17/bin/pg_restore --list > /dev/null && cat > /dev/null; }
+          echo "$out: $(du -h "$out" | cut -f1)"
+          echo "file=$out" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.dump.outputs.file }}
+          path: ${{ steps.dump.outputs.file }}
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0     # encrypted bytes do not compress

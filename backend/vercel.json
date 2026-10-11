@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["sin1"],
+  "functions": {
+    "app/main.py": {
+      "maxDuration": 300,
+      "excludeFiles": "{tests/**,evals/**,data/**,docker/**}"
+    }
+  },
+  "ignoreCommand": "if [ \"$VERCEL_ENV\" = production ]; then exit 1; else exit 0; fi"
+}

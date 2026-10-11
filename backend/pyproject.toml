@@ -1,0 +1,53 @@
+[project]
+name = "spica-backend"
+version = "0.1.0"
+description = "Spica API — rows and intelligence, never views (spec/api.md)"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "pgvector>=0.3.6",
+    "openai>=1.55",
+    "python-dotenv>=1.0",
+    "python-ulid>=4.0.1",
+    "google-auth>=2.58.0",
+    "requests>=2.34.2",
+    "mcp>=1.20",
+    # app/images.py fetches pictures with it; it used to arrive only through
+    # another package, which is not a promise.
+    "httpx>=0.28",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "openpyxl>=3.1.5",
+]
+
+# Vercel runs this after installing the dependencies and before the release
+# serves: the migrations, on production builds only. spec/in-progress/deploy.md.
+[tool.vercel.scripts]
+build = "python scripts/vercel_build.py"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+# The suite is one file per shipped spec plus a regression sweep; see
+# tests/README.md. `pythonpath` so `app` and `tests` import without a shim,
+# and one event loop for the session so the fixtures share a database.
+pythonpath = ["."]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"

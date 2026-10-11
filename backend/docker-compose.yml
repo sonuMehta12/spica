@@ -1,0 +1,31 @@
+# Spica's own Postgres. Port 5434 because 5432 and 5433 already belong to
+# kestrel and novacart — the two other projects on this machine.
+# Explicit project name. Without it compose derives one from the directory and
+# treats kestrel's and novacart's containers as orphans of *this* project — which
+# means `docker compose down --remove-orphans` here would kill their databases.
+name: cortex
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: cortex-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cortex
+      POSTGRES_PASSWORD: cortex
+      POSTGRES_DB: cortex
+      # Deterministic collation, so ORDER BY does not change under a locale.
+      POSTGRES_INITDB_ARGS: "--locale=C --encoding=UTF8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - cortex-pgdata:/var/lib/postgresql/data
+      - ./docker/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cortex -d cortex"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  cortex-pgdata:

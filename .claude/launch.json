@@ -1,0 +1,64 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "frontend",
+        "run",
+        "dev"
+      ],
+      "port": 5173,
+      "autoPort": false,
+      "_comment": "5173 is not negotiable: it is the only origin registered with the Google OAuth client, and Sign in with Google compares the port. An assigned port serves the app fine and then fails sign-in with origin_mismatch. If 5173 is taken by a healthy Vite, use frontend-attach rather than starting a second one."
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": [
+        "run",
+        "--directory",
+        "backend",
+        "uvicorn",
+        "app.main:app",
+        "--reload",
+        "--port",
+        "8001",
+        "--host",
+        "0.0.0.0"
+      ],
+      "port": 8001,
+      "autoPort": false,
+      "url": "http://localhost:8001",
+      "_comment": "8001 is not negotiable: frontend/src/data/api.ts falls back to http://<host>:8001 when VITE_API is unset, so an assigned port would be unreachable. If 8001 is already taken by a healthy backend, use backend-attach rather than freeing it."
+    },
+    {
+      "name": "apk-share",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8090",
+        "--bind",
+        "0.0.0.0",
+        "--directory",
+        "android/app/build/outputs/apk/debug"
+      ],
+      "port": 8090,
+      "autoPort": false,
+      "_comment": "The latest debug APK, for a phone on the same Wi-Fi: open http://<laptop's Wi-Fi address>:8090/app-debug.apk in the phone's browser. Serves only Gradle's debug output folder, so each build is the one served. Stop it once the phone has the app."
+    },
+    {
+      "name": "frontend-attach",
+      "url": "http://localhost:5173",
+      "_comment": "Attach to the user's own Vite on 5173 instead of starting a second server."
+    },
+    {
+      "name": "backend-attach",
+      "url": "http://localhost:8001",
+      "_comment": "Attach to a backend already running on 8001 instead of starting a second one."
+    }
+  ]
+}

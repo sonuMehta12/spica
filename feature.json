@@ -1,0 +1,537 @@
+{
+  "$comment": "Spica roadmap. Sequence matters — each feature assumes the ones above it. Status: done | in-progress | pending | blocked.",
+  "updated": "2026-10-10",
+  "phases": [
+    {
+      "phase": "0 · Web version",
+      "goal": "Prove the whole flow as a web UI before any backend exists",
+      "features": [
+        {
+          "id": "deck",
+          "title": "Swipeable mode deck",
+          "status": "done",
+          "description": "Three cards — Paisa, Diet, Kaam — on a horizontal track. Concentric arcs with a legend, one glyph as the only indicator.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "conversation",
+          "title": "Conversation and agent cards",
+          "status": "done",
+          "description": "Agent left behind its face, you right unlabelled. Typed cards that hold row ids, not snapshots, so deleting a row updates every card that showed it.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "agent-voice",
+          "title": "One agent voice",
+          "status": "done",
+          "description": "Sans + ink means the agent wrote this; mono + grey means data. Card notes derived at render time so they cannot go stale.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "compose-mode",
+          "title": "Compose mode",
+          "status": "done",
+          "description": "Tapping the composer folds the deck away. Tap-vs-scroll detection on pointerup, and composing decoupled from input blur.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "report",
+          "title": "Report page",
+          "status": "done",
+          "description": "Numbers, one chart, a tab strip and the items in place. Reachable from the drawer or by tapping a hero card, which opens that card's own mode.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "kaam",
+          "title": "Kaam mode",
+          "status": "done",
+          "description": "A bar per project — not arcs, because arc length scales with radius and three projects could not be compared. Next three tasks beside it.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "workout-strip",
+          "title": "Workout week strip",
+          "status": "done",
+          "description": "Seven marks, Monday first, in the band already reserved for the mode glyph — so it costs no height. A record, not a streak.",
+          "spec": "spec/workout.md"
+        },
+        {
+          "id": "your-data",
+          "title": "Your data",
+          "status": "done",
+          "description": "The agent's memory made visible, with an inbox for low-confidence guesses. Per-item delete, no export.",
+          "spec": "frontend/README.md"
+        },
+        {
+          "id": "mascot",
+          "title": "Mascot",
+          "status": "done",
+          "description": "One character for the chat avatar and the drawer mark. Four states, one animated face at a time.",
+          "spec": "frontend/src/components/Mascot.tsx"
+        },
+        {
+          "id": "theme",
+          "title": "Jamun — the theme",
+          "status": "done",
+          "description": "One token set on every surface: a white page on the web and a tinted ground with floating panels on the phone, a jamun brand at least 80° of hue from every mode, one colour per mode at equal lightness, Newsreader for the agent and Anek Latin for everything else, Phosphor icons, no in-page shadows, a 4dp rhythm that says who is talking. Chips come from your own ledger.",
+          "spec": "THEME.md"
+        }
+      ]
+    },
+    {
+      "phase": "1 · Backend foundation",
+      "goal": "The whole data model before the first endpoint. All three modes, each decided against real data.",
+      "features": [
+        {
+          "id": "backend-scaffold",
+          "title": "Scaffold, Postgres, hello world",
+          "status": "done",
+          "description": "FastAPI + SQLAlchemy 2.0 + asyncpg. Postgres 17 with pgvector, pg_trgm and unaccent on port 5434. GET / and GET /health verified.",
+          "spec": "spec/backend.md"
+        },
+        {
+          "id": "data-model",
+          "title": "Paisa schema",
+          "status": "done",
+          "description": "Paisa tables settled and migrated: transactions (ledger, kind covers udhaar), counterparties, predictions (signal snapshots), balance_checks, profile. Money as integer paise; ULID ids with a separate dedupe_key.",
+          "spec": "spec/done/paisa-data-model.md"
+        },
+        {
+          "id": "migrations",
+          "title": "Alembic migrations",
+          "status": "done",
+          "description": "Alembic wired to app.config and app.models. First revision applied and verified reversible.",
+          "spec": "spec/backend.md"
+        },
+        {
+          "id": "seed",
+          "title": "Paisa: import the workbook",
+          "status": "done",
+          "description": "80 rows imported: 73 expenses (₹22,139, all seven category totals matching the Dashboard), 4 lendings and 3 repayments, plus 15 counterparties, one balance check and the savings target. Idempotent via dedupe_key. Found that the workbook counted a June ₹4,000 loan against August, so the real unaccounted gap is ₹10,921, not ₹6,921.",
+          "spec": "spec/done/paisa-import.md"
+        },
+        {
+          "id": "diet-data-model",
+          "title": "Diet + health schema",
+          "status": "done",
+          "description": "Twelve tables: foods/measures/recipes/exercises (reference), meal_logs/habits/habit_logs/days (ledger), pantry/pantry_moves (house). Pantry quantity is a sum of signed moves, never a stored counter. Multi-user from day one — user_id on every personal row, retrofitted onto Paisa in the same migration. 376 rows imported from the reviewed CSVs; all 15 verification checks green, including beer→cigarette 4-of-5.",
+          "spec": "spec/done/diet-data-model.md"
+        },
+        {
+          "id": "work-data-model",
+          "title": "Work schema",
+          "status": "done",
+          "description": "Projects and tasks, one level, any origin. Built and seeded from the real material: 31 written things became 28 tasks (three merges — the duplicated CAPS observability line, Luna/Terra, thinking mode), 3 blocked_by, a real done with its real date, and the projectless insurance task. 13/13 checks green; re-run adds zero.",
+          "spec": "spec/done/work-data-model.md"
+        },
+        {
+          "id": "get-deck",
+          "title": "GET /deck",
+          "status": "done",
+          "description": "One call returns rows for all three modes, windowed by ISO dates the client sends — only the client knows the user's local day. Each mode's window is unioned with what its card structurally needs (the month for the arc, the week for the strip). Response schemas written out, so adding a column cannot silently publish it.",
+          "spec": "spec/done/deck-api.md"
+        },
+        {
+          "id": "frontend-fetch",
+          "title": "Frontend stops importing seed.ts",
+          "status": "done",
+          "description": "seed.ts deleted. One adapter (data/api.ts) translates wire rows to the prototype's types; data/live.ts exposes them as live ES bindings so metrics.ts, tasks.ts and workouts.ts keep their arithmetic byte-for-byte. Boot gates rendering on the fetch — a zero the server did not send is a fabricated number.",
+          "spec": "spec/done/deck-api.md"
+        },
+        {
+          "id": "backend-tests",
+          "title": "Backend tests, spec by spec",
+          "status": "done",
+          "description": "pytest against a fresh cortex_test built from the migrations each run. One file per shipped spec asserting its Definition of done, plus a regression sweep for the invariants: schema drift, soft deletes, orphans, replays, unknown-is-not-zero. The frontend prototype stays untested by decision.",
+          "spec": "backend/tests/README.md"
+        }
+      ]
+    },
+    {
+      "phase": "2 · Writes and reads",
+      "goal": "Logging persists and survives a reload",
+      "features": [
+        {
+          "id": "users-profile",
+          "title": "Users, profile and memory: the table, not the lock",
+          "status": "done",
+          "description": "profile → users with a real ULID id (every user_id rewritten from 'me', real FKs); the comprehensive row — name, DOB, height, city, timezone, savings + macro + weight + sleep + step targets; weigh_ins as a ledger; a memories table in our own format (slug · kind · text · source · confirmed) as the one home for facts scattered across Claude/ChatGPT/Gemini. Edit goal / Edit targets through the composer. No login.",
+          "spec": "spec/done/users-profile.md"
+        },
+        {
+          "id": "deck-ui",
+          "title": "Deck consumes /deck properly",
+          "status": "done",
+          "description": "Range semantics per card as calendar windows, the coverage rule (paisa divides by calendar days, diet by logged days — shown), the habit strip grows from workouts to all habits (fill for builds, grey count badge for breaks), and honest empty states. Kills three bugs the swap exposed.",
+          "spec": "spec/done/deck-ui.md"
+        },
+        {
+          "id": "projected-savings",
+          "title": "Projected savings (the cricket card)",
+          "status": "done",
+          "description": "Three rows on the paisa report: month-end saving at current pace, at the limit (always exactly the goal — the limit's real explanation), and the ₹100/day lever. The user hand-built this in the workbook's Dashboard §3; ledger arithmetic throughout.",
+          "spec": "spec/done/projected-savings.md"
+        },
+        {
+          "id": "ledger-writes",
+          "title": "POST /tx, /meals, /workouts, /todos",
+          "status": "done",
+          "description": "Logging persists: client-supplied ULIDs so optimistic rows keep their identity, corrections that supersede rather than edit, soft deletes, and a meal logged against a recipe spending the pantry server-side. Supersedes four rules in api.md that predate the data model.",
+          "spec": "spec/done/ledger-writes.md"
+        },
+        {
+          "id": "corrections",
+          "title": "Corrections as entries",
+          "status": "done",
+          "description": "Edit a row in place from the deck: the composer remembers which row it is editing and PATCHes it — same id, optimistic, reverts and reads 'unsaved' on failure. Money: description + amount. Meals: dish + kcal.",
+          "spec": "spec/done/corrections.md"
+        },
+        {
+          "id": "report-page",
+          "title": "Report page: tabs by data, actions on rows",
+          "status": "done",
+          "description": "Retires the reports API — the report computes client-side from /deck rows, as api.md settled. Re-cuts the tabs against the data (Paisa: All·Pending·categories; Diet: All·Meals·Habits·Sleep, Kadam dropped until steps exist) and puts the chat table's ⋮ Edit/Delete on every report row through the same endpoints.",
+          "spec": "spec/done/report-page.md"
+        },
+        {
+          "id": "event-log",
+          "title": "Event log",
+          "status": "pending",
+          "description": "Parked until Android (notes.md): updated_at + soft deletes cover sync for one client.",
+          "spec": "spec/api.md"
+        },
+        {
+          "id": "dishes",
+          "title": "Dishes: what you eat, described once",
+          "status": "done",
+          "description": "Replaces recipes. A dish is a thing you eat with a serving and macros; ingredients and steps are optional, so Office thali and Soya keema are both dishes. Global pool, your library is saved (stored) plus tried (derived from the ledger). No rank column — the agent ranks.",
+          "spec": "spec/done/dishes.md"
+        },
+        {
+          "id": "people",
+          "title": "People: the humans among your counterparties",
+          "status": "done",
+          "description": "Three columns on counterparties — kind, relation, note — and Your data → People: sent, received, still out and days-to-return, all derived from the ledger. Udhaar's per-person history gets its home.",
+          "spec": "spec/done/people.md"
+        },
+        {
+          "id": "workouts",
+          "title": "Workouts: an exercise library to suggest from",
+          "status": "done",
+          "description": "One owned library row per exercise - kind, muscle group, equipment, minutes, how-to, link, and a stored tried count. The filters are the suggestion: leg lagana hai, cardio karna hai, 20 minute hain. A workout stays a habit; nothing here records what was done.",
+          "spec": "spec/done/workouts.md"
+        },
+        {
+          "id": "places",
+          "title": "Places: where you pay and where you go, on a map",
+          "status": "done",
+          "description": "The empty places table gets rows by hand — tap the map, name it, pick a kind; a pin can belong to a counterparty and a payment can be placed after the fact. Coordinates and radii that detection matches against later.",
+          "spec": "spec/done/places.md"
+        }
+      ]
+    },
+    {
+      "phase": "3 · The agent",
+      "goal": "The premise — agent hi app hai",
+      "features": [
+        {
+          "id": "llm-seam",
+          "title": "llm.py — one module, three functions",
+          "status": "done",
+          "description": "The only file that imports an SDK. Provider and model are config (LLM_PROVIDER / LLM_MODEL; openai / gpt-5.6-luna). chat.completions with reasoning off, not the Responses API — same tool choice, half the latency, and it maps onto Anthropic's shape.",
+          "spec": "spec/agent.md"
+        },
+        {
+          "id": "chat-api",
+          "title": "POST /chat",
+          "status": "done",
+          "description": "POST /chat and GET /chat. One thread kept forever; the model sees the last twenty turns plus a rolling summary, the user sees all of it. Replies are typed cards — agent, confirm, suggest, ask — wired to the composer.",
+          "spec": "spec/agent.md"
+        },
+        {
+          "id": "categorise",
+          "title": "Auto category and description",
+          "status": "in-progress",
+          "description": "Four tiers — dictionary, rules, one model call with the skill file as its prompt, then the user — behind one function with two doors: the categorise_now tool and a cron script. No route. Evaluated dry on the 78 labelled rows before any card: 83% and 74% overall on two splits, 23/23 correct where it wrote silently. Ran live 2026-09-15: 0 written, 5 agreed, 14 asked, no category changed without the user. Now scheduled for 20:30 via schedules.",
+          "spec": "spec/in-progress/categorise.md"
+        },
+        {
+          "id": "schedules",
+          "title": "Schedules — the things Spica does on its own",
+          "status": "in-progress",
+          "description": "A schedules table the user owns — time, repeat (daily/weekly/once), grace and params, nothing hardcoded — read by one OS tick that runs whatever is due. A job's output is one agent-written turn in the thread, no fake user message. First job: the categoriser at 20:30 — and after borrowed-runners.md, its only kind of job: what must run without a laptop open, and what has to reach Android. Left: install the crontab line, and the Profile group needs a browser pass once sign-in lands.",
+          "spec": "spec/in-progress/schedules.md"
+        },
+        {
+          "id": "morning-brief",
+          "title": "Morning brief",
+          "status": "pending",
+          "description": "Spica speaks first: once a morning, or every few days, the day is prepared in the background — what to eat, what is due, what is left to spend — and waits as one turn in the thread, a notification on Android. Requirement recorded; who runs it, and whether an outside assistant may write rows, are still to brainstorm.",
+          "spec": "spec/in-progress/morning-brief.md"
+        },
+        {
+          "id": "udhaar",
+          "title": "Udhaar detection",
+          "status": "pending",
+          "description": "Half shipped: the manual lending, borrowing, repayment and Gift flows are built and tested (spec/done/udhaar-repayment.md, udhaar-borrowed.md), and the budget treatment with them. What remains in spec/udhaar.md is detection, auto-matching and reminders — all of which need the agent or Android capture.",
+          "spec": "spec/agent.md"
+        },
+        {
+          "id": "fixed-costs",
+          "title": "Fixed costs: lock it, repeat it",
+          "status": "done",
+          "description": "Two flags on any payment — Lock (committed, not spending) and Repeat (expect it next month). Last month's repeating rows are locked out of the pool until paid, shown · andaaza; paying leaves the limit where it was. Replaces the invisible fixed tag with a decision the user flips on the row.",
+          "spec": "spec/done/fixed-costs.md"
+        },
+        {
+          "id": "chat-cards",
+          "title": "Chat cards",
+          "status": "done",
+          "description": "The reply as typed cards: ledger rows in the @paisa layout with the shared ⋮ tray, a dish card that logs on tap through the route, a confirm card for every write with an amber dot for guessed fields and Confirm in the tray. English copy; the agent's prose stays in the user's language.",
+          "spec": "spec/done/chat-cards.md"
+        },
+        {
+          "id": "card-redesign",
+          "title": "The cards, redesigned",
+          "status": "done",
+          "description": "Text first, the card below — never a sentence inside a card. A write is one receipt line; a guess asks in place, and Change attaches to the composer; figures in ink; every card reads its live row, a removed one has Undo, and loans never ask a category. Shipped on the web and Android after a hand test of every card; the server half is tests/test_card_redesign.py and the whole loop is evals/n2n_eval.py. The cards no turn produces yet (ask, the morning brief) are parked in spec/notes.md.",
+          "spec": "spec/done/card-redesign.md"
+        },
+        {
+          "id": "agent-deletes",
+          "title": "Delete and re-date from the agent",
+          "status": "done",
+          "description": "delete_payment and delete_meal, plus local_day on both correction tools so a row can move to another day. Prompt rules that stop the agent inventing a broken feature or writing its intentions into a row's note, and a remember that refuses bug reports.",
+          "spec": "spec/done/agent-deletes.md"
+        },
+        {
+          "id": "prompt-layout",
+          "title": "Static prompt first, now last",
+          "status": "done",
+          "description": "The agent knows the real date and the clock. Everything volatile moved out of the system prompt onto the turn, so the 4,584-token static prefix and the tool schemas stay cacheable; folding batched so the window is append-only and the extra summary call runs once per twenty turns.",
+          "spec": "spec/done/prompt-layout.md"
+        },
+        {
+          "id": "chat-history",
+          "title": "Paging the thread, and clearing the view",
+          "status": "done",
+          "description": "A seq cursor on GET /chat so the client loads 20 at a time instead of the whole thread, with scroll anchoring. A header button that clears the screen and compacts what it hides into the summary — nothing deleted, and Show brings it back.",
+          "spec": "spec/done/chat-history.md"
+        },
+        {
+          "id": "habits",
+          "title": "Habits you can add, rename and retire",
+          "status": "done",
+          "description": "Three habits existed because a migration inserted them. Now four routes, a Health section in Profile, and a manage_habit tool — addressed by the name the user says or by id, so a habit started mid-turn can be ticked in that same turn.",
+          "spec": "spec/done/habits.md"
+        },
+        {
+          "id": "meal-estimates",
+          "title": "The model prices the plate, the ladder names it",
+          "status": "done",
+          "description": "A meal was worth whatever the library matched, so a plate it had never seen logged at 0 kcal — and the library was specified for suggestion, carries no provenance on 30 of 41 foods, and multiplies whole bundles by a serving count. The ladder still resolves identity and spends the pantry; the model estimates worth with the library and the user's own corrected portions as context. Never silent: 0.6 confidence, amber dot, the assumption stated. estimated_* is frozen so the error stays measurable, and corrections feed the next estimate. Measured first: 22% median kcal error vs 100% for zeros.",
+          "spec": "spec/in-progress/meal-estimates.md"
+        },
+        {
+          "id": "chat-quality",
+          "title": "Chat quality",
+          "status": "done",
+          "description": "The chat eval, rebuilt: a day of 79 sentences said three times to the real model, code checks plus Claude reading every reply. Rounds of fixes to the prompt, every tool description, tool results and cards took it from 63% to 96% of cases and 99% of turns on Luna at medium effort — never a bigger model, on cost, and no glue: whether a list shows as a card is the agent's call (show), and a follow-up that could correct or add is asked about.",
+          "spec": "spec/done/chat-quality.md"
+        },
+        {
+          "id": "memory-learning",
+          "title": "What Spica knows about you",
+          "status": "pending",
+          "description": "Memory, context and learning as one design: what each turn is given (memories, profile, window, summary, ids of rows written), a background pass that keeps lasting facts, a summary that keeps what matters, and patterns learned from the ledger without being stored. After chat quality.",
+          "spec": "spec/in-progress/memory.md"
+        }
+      ]
+    },
+    {
+      "phase": "4 · Capture and time",
+      "goal": "Things get in, and the app gains a future tense",
+      "features": [
+        {
+          "id": "share-capture",
+          "title": "Share from another app, or from Chrome",
+          "status": "pending",
+          "description": "Two deliberate doors, one pipeline: the Android share sheet on the phone and a Chrome extension button on the desktop. Store the link and confirm before anything is understood — a share that can fail is a share that stops happening. No passive capture.",
+          "spec": "spec/capture.md"
+        },
+        {
+          "id": "enrich",
+          "title": "Link enrichment",
+          "status": "pending",
+          "description": "Fetch, parse, LLM, structured with sources. Allowed to fail — Instagram often yields only a URL.",
+          "spec": "spec/capture.md"
+        },
+        {
+          "id": "commitments",
+          "title": "Commitments",
+          "status": "done",
+          "description": "What you still owe this month, as rows the user owns: set, edit, skip, repeat and delete from a page, from chat (manage_commitment) and from a payment's tray. Replaces the fixed / repeats flags, which reserved money no one could see or change. Designed 2026-10-10; stage 1 (the commitments read) shipped with the finance audit.",
+          "spec": "spec/done/commitments.md"
+        },
+        {
+          "id": "diet-logging",
+          "title": "Meal parsing and estimation",
+          "status": "done",
+          "description": "A spoken meal becomes rows: the ladder resolves each item (exact, alias, trigram) and refuses to invent. \"1 katori dal\" is 300g via measures; \"2 roti\" carries no weight, so the agent asks. Estimation from the dish and food libraries; suggestion is still owed.",
+          "spec": "spec/agent.md"
+        },
+        {
+          "id": "pantry",
+          "title": "Pantry depletion and shopping list",
+          "status": "done",
+          "description": "Your data → Pantry over the real moves ledger. Stock (Buy / Stocked / Always here, status derived: unknown, out, stale, soon, ok) and Moves (the signed-grams ledger, each consumption naming its meal). Bought, Have, Settings, Undo, Stop tracking, Add item — every action writes a row, never edits a quantity.",
+          "spec": "spec/done/pantry-view.md"
+        },
+        {
+          "id": "meal-suggestion",
+          "title": "Meal suggestion, done properly",
+          "status": "pending",
+          "description": "What to eat, worked out as the engine spec says — the day's gap, the slots left, the pantry, what they actually eat — not looked up in the library at one serving. Ideas beyond the library, sized portions, one reasoning for chat and Home, and a first day that works. To design before building.",
+          "spec": "spec/in-progress/meal-suggestion.md"
+        }
+      ]
+    },
+    {
+      "phase": "4.5 · The door",
+      "goal": "Somebody other than the owner can use this — the release prerequisite the queue has always named",
+      "features": [
+        {
+          "id": "sign-in",
+          "title": "Sign in with Google",
+          "status": "in-progress",
+          "description": "The lock lands inside the seam app/auth.py and no endpoint changed. A Google ID token is verified against Google's keys and exchanged for an opaque session token, stored as its SHA-256 so a database dump cannot be replayed as a login. ALLOWED_EMAILS gates creation and accepts * for anyone; a daily turn cap and signup cap make opening the door a decision with a known worst case. DELETE /users/me is the exit an open door owes. Android's Credential Manager hits the same route with the same Web client ID.",
+          "spec": "spec/in-progress/sign-in.md"
+        },
+        {
+          "id": "onboarding",
+          "title": "Onboarding — one screen before, a checklist after",
+          "status": "done",
+          "description": "Superseded 2026-10-11 by onboarding-goals. The door was the pitch: a replay of three beats drawn with the app's own card parts, not a video that goes stale the week a card changes. After the first sign-in nothing is asked: a two-sentence greeting and three chips that send a real first sentence. Then Getting started — six steps derived from rows, never stored (a payment, a meal, a savings target, diet targets, what you pay every month, a task), every step kept on the card and struck through when done; one thank-you that counts nothing, or Hide. onboarding_done_at is the one stored fact, set by the client and never cleared. No nudges in the chat — the card says it.",
+          "spec": "spec/done/onboarding.md"
+        },
+        {
+          "id": "onboarding-goals",
+          "title": "Onboarding — goals first",
+          "status": "done",
+          "description": "Replaces the logger-first onboarding with a goal-first one: a dots film on the door (a life in a mess, put in order, then one month's results), a take-control picker, a few spoken questions in the app's own chat parts (name, gender, age, height, weight; city and diet; the details of each picked goal), and a goals summary. A dedicated onboarding agent writes each answer through the app's own tools (profile, weigh-in, memories, habits, tasks), every write a card to confirm or edit; Home's meal plan and the chat agent read the answers from day one. Every answer is skippable, an age is stored as 1 January of its year, and a weight given as a guess carries the amber dot until an exact one replaces it. Designed on the 'Spica onboarding' canvas; shipped 2026-10-11 on the web, the server and the phone.",
+          "spec": "spec/done/onboarding-goals.md"
+        }
+      ]
+    },
+    {
+      "phase": "5 · Work sync",
+      "goal": "The agent lives where the chat already happens; Spica is the glance",
+      "features": [
+        {
+          "id": "projects",
+          "title": "Projects you make, and tasks you can say",
+          "status": "done",
+          "description": "Shipped 2026-09-27. Projects gain a description, an icon (emoji or one of 16 named icons), aliases, and one default ('Personal') every task falls back to; a Projects group in Profile below Health; /projects routes; manage_project and save_task for the agent (two, not three, to stay under the 25-tool ceiling); the Work composer switched on. One placement rule for chat, the routine and the API: named → the source's project by alias → the task's nature, marked guessed (in chat, read from the person's own words) → the default.",
+          "spec": "spec/done/projects.md"
+        },
+        {
+          "id": "task-protocol",
+          "title": "Task identity in files",
+          "status": "parked",
+          "description": "Archived 2026-09-27 with repo checkbox scanning: work tasks arrive from Linear and meetings, not repo checkboxes. The marker design is kept in spec/archive/repo-task-scanner.md if repos ever become a read-only source.",
+          "spec": "spec/archive/repo-task-scanner.md"
+        },
+        {
+          "id": "deploy",
+          "title": "Deploy on Render",
+          "status": "pending",
+          "description": "Always-on paid web service and Postgres (the free tiers sleep, and delete the database at 44 days), a Cron Job for the schedules tick, and the app itself — claude.ai sends the person to its /connect page to approve the connector. Draft with what the code reads and what is still open.",
+          "spec": "spec/in-progress/deploy.md"
+        },
+        {
+          "id": "landing",
+          "title": "Landing page and its film",
+          "status": "done",
+          "description": "Built 2026-09-27 at /landing: full width and responsive; the three stories told as problem → what changes → what it gives back. The hero runs the app's real deck (ModeDeck + HeroCard via heroFor) on an invented month, and a sentence landing moves the real card. Download on Google Play — Android only, said under the button (APP_URL still to set, TODO.md) — and Try it on the web. Work told as a pipeline: Linear, Wispr Flow, WhatsApp and Notes flowing into one list in the app's own task rows; Gmail and Slack dashed, not built. A ~45-second film drawn in code with synthesised sound, on from the first tap, also alone at /film for recording. Real marks throughout. No number the product has not measured. Open: signed-out root once deployed, and a waitlist.",
+          "spec": "frontend/src/landing/Landing.tsx"
+        },
+        {
+          "id": "cc-plugin",
+          "title": "Work sync — MCP server and cloud routine",
+          "status": "in-progress",
+          "description": "Built and verified locally 2026-09-27: the MCP server at /mcp with four task tools, OAuth with tokens scoped to /mcp, the /connect approval page, and the instructions Spica serves the routine. Run end to end against the dev server with the real Linear and Wispr Flow connectors. Left: deploy (spec/in-progress/deploy.md), then add Spica as a claude.ai connector and create the cloud routine.",
+          "spec": "spec/work-sync.md"
+        },
+        {
+          "id": "task-two-way",
+          "title": "Linear: read, then remind",
+          "status": "in-progress",
+          "description": "Built and verified live on a test issue: ticked in Spica → reminder; moved in Linear → cleared; completed-type back to started → reopened; canceled → archived. Spica never writes to Linear. Moving one stage on a yes stays deferred (spec/notes.md). Waits on the cloud routine like the rest of work sync.",
+          "spec": "spec/work-sync.md"
+        },
+        {
+          "id": "agent-everywhere",
+          "title": "Spica on Claude surfaces",
+          "status": "pending",
+          "description": "Future scope. The same MCP server work sync builds, exposing the rest of the tool registry so Claude Code and the Claude app can read and write all three modes — aaj ka limit, aaj ka to-do, meal plan, log it. Carries ~99% of the model spend if it ever moves chat onto a subscription surface.",
+          "spec": "spec/agent-everywhere.md"
+        }
+      ]
+    },
+    {
+      "phase": "6 · Android",
+      "goal": "Only once the flow is proven, knowing exactly what to build",
+      "features": [
+        {
+          "id": "android-app",
+          "title": "Kotlin + Compose app",
+          "status": "in-progress",
+          "description": "The web prototype, native, against the same API: door, deck, conversation with every card, composer, Reports, Your data, Profile. Online with optimistic writes, as the web is — local-first storage is deferred (notes.md). Google sign-in works on a real phone; a debug build reaches the laptop backend over the Wi-Fi, no deployment. Debug builds can also take a laptop-minted session.",
+          "spec": "android/README.md"
+        },
+        {
+          "id": "nudges",
+          "title": "Nudges — the bell",
+          "status": "in-progress",
+          "description": "What Cortex says without being asked, behind a bell in the top bar, never in the thread: the morning brief (Your day, Meals today, Workout), a dinner check, reminders and the payments to check. Each comes from a Daily run you can see and turn off, opens a page where the thing gets done, and expires with its day. Designed 2026-10-08.",
+          "spec": "spec/in-progress/nudges.md"
+        },
+        {
+          "id": "home-page",
+          "title": "Home and Chat, two pages",
+          "status": "done",
+          "description": "The deck took most of a phone's screen, so on the phone it is gone: a Home | Chat pill and a swipe switch between two pages under one composer. Home greets you, then Today (three tasks, the most pressing first), Money (left today, the month in and out, expected saving, committed, lent out), Diet, Activity (steps, active calories and the week's runs and rides, read from Health Connect on the phone) and Habits. Work is called To-do, Paisa is Money. The web keeps the deck.",
+          "spec": "android/app/src/main/java/com/sonu/spica/ui/home/HomePage.kt"
+        },
+        {
+          "id": "today-plan",
+          "title": "Today's plan — meals and a workout on Home",
+          "status": "in-progress",
+          "description": "Two widgets on the phone's Home: Meals plans the rest of today to the targets — a library dish at its own numbers, or an idea marked as one — and Workout suggests one session from the week. One model call (GET /plan/today), reused until a write it read changes; pictures from Wikimedia Commons under a free licence, with credit. tests/test_today_plan.py; n2n_eval's plan cases.",
+          "spec": "spec/in-progress/today-plan.md"
+        },
+        {
+          "id": "payment-capture",
+          "title": "Payment capture",
+          "status": "blocked",
+          "description": "Notification listener, Account Aggregator or manual. The biggest unanswered question — it shapes the whole Paisa ledger, so decide before the schema hardens. No SMS, no call logs.",
+          "spec": "spec/paisa-categorise.md"
+        },
+        {
+          "id": "widgets",
+          "title": "Home screen widgets",
+          "status": "pending",
+          "description": "Four, via Glance. Kaam earns its place because it is the only one where something gets done rather than read. Blocked on a font spike.",
+          "spec": "spec/widgets.md"
+        },
+        {
+          "id": "backup",
+          "title": "Encrypted restore-only backup",
+          "status": "pending",
+          "description": "Not export — that stays a no. But no-backup is the worse risk: a lost phone is years of ledger gone.",
+          "spec": "spec/substrate.md"
+        }
+      ]
+    }
+  ]
+}

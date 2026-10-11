@@ -1,0 +1,41 @@
+name,aliases,kind,muscle_group,equipment,typical_minutes
+Barbell bench press,bench press;bench,strength,chest,barbell,12
+Incline dumbbell press,incline press;incline db press,strength,chest,dumbbell,10
+Machine chest press,chest press,strength,chest,machine,10
+Cable fly,pec fly;fly,strength,chest,cable,8
+Push-up,pushup;pushups,strength,chest,bodyweight,6
+Pull-up,pullup;pullups,strength,back,bodyweight,8
+Lat pulldown,pulldown,strength,back,cable,10
+Barbell row,bent over row;bb row,strength,back,barbell,12
+Seated cable row,cable row,strength,back,cable,10
+Deadlift,conventional deadlift,strength,back,barbell,15
+Face pull,,strength,back,cable,6
+Barbell shoulder press,overhead press;ohp;military press,strength,shoulders,barbell,10
+Dumbbell lateral raise,lateral raise;side raise,strength,shoulders,dumbbell,8
+Rear delt fly,reverse fly,strength,shoulders,dumbbell,6
+Arnold press,,strength,shoulders,dumbbell,8
+Barbell curl,bicep curl;bb curl,strength,arms,barbell,8
+Dumbbell hammer curl,hammer curl,strength,arms,dumbbell,8
+Preacher curl,,strength,arms,machine,8
+Triceps pushdown,pushdown;tricep pushdown,strength,arms,cable,8
+Skull crusher,lying tricep extension,strength,arms,barbell,8
+Barbell squat,squat;back squat,strength,legs,barbell,15
+Leg press,,strength,legs,machine,12
+Romanian deadlift,rdl,strength,legs,barbell,12
+Walking lunge,lunge;lunges,strength,legs,dumbbell,10
+Leg curl,hamstring curl,strength,legs,machine,8
+Leg extension,quad extension,strength,legs,machine,8
+Calf raise,calf raises,strength,legs,machine,6
+Plank,,strength,core,bodyweight,5
+Hanging leg raise,leg raise,strength,core,bodyweight,6
+Cable crunch,,strength,core,cable,6
+Russian twist,,strength,core,bodyweight,5
+Incline walk,treadmill walk;incline treadmill,cardio,,machine,20
+Treadmill run,running;run,cardio,,machine,20
+Cycling,cycle;stationary bike,cardio,,machine,20
+Skipping,jump rope;rope,cardio,,none,10
+Stair climber,stairmaster,cardio,,machine,15
+Cat-cow,,mobility,,bodyweight,3
+Hip flexor stretch,,stretch,legs,bodyweight,3
+Shoulder dislocates,band dislocates,mobility,shoulders,none,3
+Couch stretch,,stretch,legs,bodyweight,4

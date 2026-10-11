@@ -1,0 +1,278 @@
+/* Reset + the handful of things inline styles cannot express: hover, focus, keyframes.
+   Every colour and face is a custom property set from theme.ts at boot
+   (`cssVars()` in main.tsx), so nothing here names a hex. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* The shell fills the visible area exactly, so nothing can be scrolled out of
+   sight when the on-screen keyboard opens. `--app-h` is set from
+   visualViewport for iOS, which ignores `interactive-widget`. */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  font-family: var(--f-sans);
+  color: var(--ink);
+  /* Every number lines up: ₹1,100 and ₹8,880 are the same width. */
+  font-feature-settings: 'tnum';
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  font-feature-settings: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  font-feature-settings: inherit;
+}
+
+::selection {
+  background: var(--brand-tint);
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ── App shell ─────────────────────────────────────────────
+   Fills the viewport on a phone; on a wide screen it sits as a
+   centred phone-width column so the layout never stretches. */
+.app-shell {
+  height: var(--app-h, 100dvh);
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+@media (min-width: 520px) {
+  .app-shell {
+    height: min(var(--app-h, 100dvh), 900px);
+    margin-block: max(0px, calc((var(--app-h, 100dvh) - 900px) / 2));
+    border-radius: 28px;
+    /* The phone-width column on a laptop: an edge, not a lift. */
+    box-shadow: 0 0 0 1px var(--line);
+  }
+  body {
+    background: var(--surface);
+  }
+}
+
+/* ── Swipe deck ────────────────────────────────────────
+   pan-y hands vertical scrolling back to the browser while the
+   pointer handlers own the horizontal axis. */
+.deck {
+  touch-action: pan-y;
+}
+
+.deck * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* A field on a deck's page (the Report's Repaid amount, a new lending)
+   still takes its text: Safari will not type into an unselectable input. */
+.deck input,
+.deck textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ── Scrolling ─────────────────────────────────────────── */
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ring-idle) transparent;
+}
+
+.scroll-y::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scroll-y::-webkit-scrollbar-thumb {
+  background: var(--ring-idle);
+  border-radius: 3px;
+}
+
+/* ── Horizontal tab strip ──────────────────────────────
+   Scrolls left-to-right rather than wrapping; the scrollbar itself
+   would be noise on a control this small. */
+.strip-x {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.strip-x::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Hover affordances (canvas `style-hover`) ──────────── */
+/* `!important` because every element here sets its resting background
+   inline, and an inline style otherwise outranks a class — the hover never
+   showed. */
+.hov-tint:hover {
+  background: var(--line-soft) !important;
+}
+
+.hov-chip:hover {
+  border-color: var(--brand-soft) !important;
+  background: var(--chip-hover) !important;
+}
+
+/* The brand's own button — send, mic, Done. */
+.hov-brand:hover {
+  background: var(--brand-hover) !important;
+}
+
+.hov-ink:hover {
+  color: var(--ink);
+}
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes wv {
+  0%,
+  100% {
+    height: 7px;
+    opacity: 0.45;
+  }
+  50% {
+    height: 24px;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeup {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Mascot ─────────────────────────────────────────────────────────────
+   The Constellation: a centre dot, four mid dots on the axes, four small ones
+   on the diagonals. Animation lives here rather than in the component so it
+   runs on the compositor.
+
+   Outer dots move along their own spoke from the centre and never change
+   size: `--dx` / `--dy` are that spoke, set per dot by the component, so one
+   keyframe moves every dot the right way. In an SVG a CSS px is a user unit.
+--------------------------------------------------------------------------- */
+.cx-mascot { display: block; overflow: visible; }
+/* Scale about the dot itself: an SVG element's origin is the canvas corner by
+   default, and the breath would drift up and left. */
+.cx-mascot .cx-core { transform-box: fill-box; transform-origin: center; }
+
+/* still — a portrait, not an agent. Older messages and the drawer mark use
+   this: exactly one mark on screen is ever alive. */
+.cx-mascot[data-state='still'], .cx-mascot[data-state='still'] * { animation: none !important; }
+
+/* idle — the centre breathes, and nothing else moves */
+.cx-mascot[data-state='idle'] .cx-core { animation: cx-breathe 2.5s ease-in-out infinite alternate; }
+@keyframes cx-breathe { from { transform: scale(1); } to { transform: scale(1.06); } }
+
+/* thinking — the outer dots dim in turn, clockwise from the top. `both` holds
+   a dot at full until its turn comes. */
+.cx-mascot[data-state='thinking'] .cx-dot { animation: cx-pulse 1.2s ease-in-out var(--delay) infinite both; }
+@keyframes cx-pulse { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+
+/* listening — sound travels outward, so the outer dots do: 6% and back */
+.cx-mascot[data-state='listening'] .cx-dot { animation: cx-drift .95s ease-in-out infinite alternate; }
+@keyframes cx-drift {
+  from { transform: translate(0, 0); }
+  to   { transform: translate(calc(var(--dx) * .06), calc(var(--dy) * .06)); }
+}
+
+/* saving — a beat: the outer dots draw in a quarter, spring back out past
+   their place and settle, 600ms in all. `done` runs the same animation and
+   `both` holds its last frame — the mark at rest — for as long as the row
+   keeps the state; saving → done shares the name, so it does not beat twice. */
+.cx-mascot[data-state='saving'] .cx-dot,
+.cx-mascot[data-state='done']   .cx-dot { animation: cx-beat .6s both; }
+@keyframes cx-beat {
+  0%     { transform: translate(0, 0); animation-timing-function: ease-in; }
+  30%    { transform: translate(calc(var(--dx) * -.25), calc(var(--dy) * -.25)); animation-timing-function: ease-out; }
+  63.33% { transform: translate(calc(var(--dx) * .08), calc(var(--dy) * .08)); animation-timing-function: ease-in-out; }
+  100%   { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx-mascot, .cx-mascot * { animation: none !important; }
+}
+
+/* Profile page: a card's edge is the first row's rule. */
+.profile-group > .profile-cell:first-of-type {
+  border-top: none !important;
+}
+
+/* The agent's markdown: the last block carries no bottom margin, so a reply
+   ends where its words do and the thread's own spacing takes over. */
+.cx-md > :last-child {
+  margin-bottom: 0 !important;
+}
+
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* The receipt above the composer: rises 8px into place, then just leaves. */
+@keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* A working indicator for any button that waits on the server. Not the
+   mascot's `cx-spin`, which starts at the ring's own angle. */
+@keyframes spin { to { transform: rotate(360deg); } }

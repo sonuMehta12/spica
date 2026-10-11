@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spica — the door</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Latin:wght@400;500;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#732F67}a:hover{color:#611D55}
+.sans{font-family:'Anek Latin',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.voice{font-family:'Newsreader',Georgia,serif;font-variant-numeric:tabular-nums}
+.dot{position:absolute;transition:left 1000ms cubic-bezier(.2,.75,.2,1),top 1000ms cubic-bezier(.2,.75,.2,1),width 700ms ease,height 700ms ease,opacity 600ms ease}
+.dot i{display:block;width:100%;height:100%;border-radius:50%;transition:background-color 700ms ease}
+@keyframes jit{0%,100%{transform:translate(0,0)}20%{transform:translate(3px,-2px)}40%{transform:translate(-2px,3px)}60%{transform:translate(2px,2px)}80%{transform:translate(-3px,-1px)}}
+.dot i.jit{animation:jit 700ms ease-in-out infinite}
+.mk{position:absolute;transition:opacity 700ms ease,transform 900ms cubic-bezier(.2,.75,.2,1)}
+.fade{transition:opacity 650ms ease,transform 750ms cubic-bezier(.2,.75,.2,1)}
+@media (prefers-reduced-motion: reduce){.dot i.jit{animation:none}.dot,.dot i,.mk,.fade{transition:none}}
+</style>
+</helmet>
+<div class="sans" style="width: 390px; height: 844px; box-sizing: border-box; background: #F2EFF1; color: #1B171A; display: flex; flex-direction: column; padding: 40px 20px 26px">
+  <div style="text-align: center; font-weight: 600; font-size: 20px; letter-spacing: -0.5px">spica</div>
+
+  <figure aria-label="A short film in dots: a life slipping out of hand — money, time and health — is put in order by Spica, and becomes results: money saved, weight lost, hours back, a habit kept." style="margin: 6px -20px 0; position: relative; height: 560px; overflow: hidden">
+    <svg class="mk" width="34" height="34" viewBox="0 0 96 96" aria-hidden="true" style="left: 178px; top: 22px; opacity: {{markO}}; transform: scale({{markS}})">
+      <circle cx="48" cy="48" r="10" fill="#732F67"></circle>
+      <circle cx="48" cy="20" r="6" fill="#732F67"></circle><circle cx="76" cy="48" r="6" fill="#732F67"></circle>
+      <circle cx="48" cy="76" r="6" fill="#732F67"></circle><circle cx="20" cy="48" r="6" fill="#732F67"></circle>
+      <circle cx="68" cy="28" r="3.5" fill="#732F67"></circle><circle cx="68" cy="68" r="3.5" fill="#732F67"></circle>
+      <circle cx="28" cy="68" r="3.5" fill="#732F67"></circle><circle cx="28" cy="28" r="3.5" fill="#732F67"></circle>
+    </svg>
+
+    <div class="fade" style="position: absolute; left: 0; right: 0; top: 112px; display: flex; justify-content: center; opacity: {{daysO}}">
+      <sc-for list="{{days}}" as="w" hint-placeholder-count="7">
+        <span style="width: 34px; text-align: center; font-size: 12px; color: #726F71">{{w}}</span>
+      </sc-for>
+    </div>
+
+    <sc-for list="{{dots}}" as="d" hint-placeholder-count="28">
+      <span class="dot" style="left: {{d.x}}; top: {{d.y}}; width: {{d.s}}; height: {{d.s}}; opacity: {{d.o}}"><i class="{{d.cls}}" style="background-color: {{d.c}}; animation-delay: {{d.delay}}"></i></span>
+    </sc-for>
+
+    <div class="fade" style="position: absolute; left: 24px; right: 24px; top: 300px; text-align: center; opacity: {{winO}}; transform: translateY({{winY}})">
+      <div style="font-size: 46px; line-height: 50px; font-weight: 500; letter-spacing: -1px; color: {{win.ink}}">{{win.figure}}</div>
+      <div class="voice" style="margin-top: 2px; font-size: 18px; line-height: 25px; color: #1B171A">{{win.line}}</div>
+    </div>
+
+    <div class="voice fade" style="position: absolute; left: 24px; right: 24px; top: 474px; text-align: center; font-size: 20px; line-height: 27px; color: #1B171A; opacity: {{cap1}}">Money slipping. Time slipping.<br>Health slipping.</div>
+    <div class="voice fade" style="position: absolute; left: 24px; right: 24px; top: 316px; text-align: center; font-size: 20px; line-height: 27px; color: #1B171A; opacity: {{cap2}}">Spica puts it in order.</div>
+    <div class="voice fade" style="position: absolute; left: 24px; right: 24px; top: 352px; text-align: center; font-size: 28px; line-height: 34px; font-weight: 500; color: #1B171A; opacity: {{cap3}}">Time for what matters.</div>
+  </figure>
+
+  <div class="voice" style="margin-top: 6px; font-size: 25px; line-height: 31px; font-weight: 500; text-align: center">Less managing life.<br>More achieving it.</div>
+
+  <div style="flex: 1"></div>
+  <a href="Choose.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 10px; height: 52px; border-radius: 999px; background: #FFFFFF; box-shadow: 0 4px 18px rgba(27,23,26,0.06); color: #1B171A; text-decoration: none; font-size: 16px; font-weight: 500">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h5.1a4.4 4.4 0 0 1-1.9 2.9v2.4h3.1c1.8-1.7 2.7-4.1 2.7-7z" fill="#4285F4"></path><path d="M12 21.5c2.6 0 4.7-.9 6.3-2.3l-3.1-2.4c-.9.6-1.9.9-3.2.9-2.5 0-4.6-1.7-5.3-3.9H3.5v2.5A9.5 9.5 0 0 0 12 21.5z" fill="#34A853"></path><path d="M6.7 13.8a5.7 5.7 0 0 1 0-3.6V7.7H3.5a9.5 9.5 0 0 0 0 8.6l3.2-2.5z" fill="#FBBC05"></path><path d="M12 6.3c1.4 0 2.6.5 3.6 1.4l2.7-2.7A9.5 9.5 0 0 0 3.5 7.7l3.2 2.5C7.4 8 9.5 6.3 12 6.3z" fill="#EA4335"></path></svg>
+    Continue with Google
+  </a>
+  <div style="margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: #726F71">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#726F71" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2"></rect><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"></path></svg>
+    Your data stays yours
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+var N = 28;
+var MESS = ['#239D6A', '#C16E2D', '#418AD1', '#7C3C00', '#A09DA0', '#BD3933', '#9DD3B5', '#A2C8F0'];
+var ROWS = ['#239D6A', '#7C3C00', '#C16E2D', '#418AD1'];
+var WINS = [
+  { figure: '₹15,000', line: 'saved this month.', hue: '#239D6A', ink: '#00613A', missed: [4, 13, 22] },
+  { figure: '−2 kg', line: 'this month, and counting.', hue: '#C16E2D', ink: '#7C3C00', missed: [5, 6, 17, 26] },
+  { figure: '6 hours', line: 'a week, back for you.', hue: '#418AD1', ink: '#125289', missed: [9, 23] },
+  { figure: '4 weeks', line: 'at the gym. Started, and stuck.', hue: '#7C3C00', ink: '#7C3C00', missed: [] }
+];
+var MARK = [[48,48,10],[48,20,6],[76,48,6],[48,76,6],[20,48,6],[68,28,3.5],[68,68,3.5],[28,68,3.5],[28,28,3.5]];
+var LOOP = 44;
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { t: 0 };
+  }
+  componentDidMount() {
+    var self = this;
+    this.timer = setInterval(function () { self.setState({ t: (self.state.t + 1) % LOOP }); }, 500);
+  }
+  componentWillUnmount() { clearInterval(this.timer); }
+
+  renderVals() {
+    var t = this.state.t;
+    var mess = t < 10, order = t >= 10 && t < 15, outcome = t >= 15 && t < 35, close = t >= 35;
+    var scene = outcome ? Math.min(3, Math.floor((t - 15) / 5)) : 0;
+    var win = WINS[scene];
+    var dots = [];
+    for (var i = 0; i < N; i++) {
+      var x, y, s, o = 1, c, cls = 'still';
+      if (mess) {
+        // scattered, shaking, and sliding down: the month slipping away
+        x = 18 + ((i * 97 + 31) % 340);
+        y = 40 + ((i * 131 + 17) % 300) + t * (6 + (i % 5) * 3);
+        s = 9 + (i % 4) * 3;
+        c = MESS[i % MESS.length];
+        cls = 'jit';
+        o = y > 470 ? 0 : 1;
+      } else if (close) {
+        var m = MARK[i < MARK.length ? i : 0];
+        s = m[2] * 4;
+        x = 195 + (m[0] - 48) * 2 - s / 2;
+        y = 236 + (m[1] - 48) * 2 - s / 2;
+        o = i < MARK.length ? 1 : 0;
+        c = '#732F67';
+      } else {
+        var col = i % 7, row = Math.floor(i / 7);
+        s = 16;
+        x = 93 + col * 34 - s / 2;
+        y = 150 + row * 34 - s / 2;
+        if (order) c = ROWS[row];
+        else c = win.missed.indexOf(i) >= 0 ? '#E8E5E7' : win.hue;
+      }
+      dots.push({ x: Math.round(x) + 'px', y: Math.round(y) + 'px', s: s + 'px', o: o, c: c, cls: cls,
+                  delay: (-(i * 113) % 700) + 'ms' });
+    }
+    var sceneT = outcome ? (t - 15) % 5 : 0;
+    var winShown = outcome && sceneT >= 1;
+    return {
+      dots: dots, win: win,
+      days: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      daysO: outcome ? 1 : 0,
+      winO: winShown ? 1 : 0, winY: winShown ? '0px' : '10px',
+      markO: order || outcome ? 1 : 0, markS: order || outcome ? 1 : 0.6,
+      cap1: mess && t >= 2 ? 1 : 0,
+      cap2: order && t >= 11 ? 1 : 0,
+      cap3: close && t >= 36 ? 1 : 0
+    };
+  }
+}
+</script>
+</body>
+</html>

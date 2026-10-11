@@ -1,0 +1,14 @@
+# What is never uploaded to Vercel from this folder. spec/in-progress/deploy.md.
+#
+# The secrets. A Git deploy never has them — git ignores them — but
+# `vercel deploy` uploads every file it finds and by default skips only
+# `.env.local` and `.env.*.local`; pydantic-settings would then read a shipped
+# `.env` for any key Vercel does not set.
+.env
+.env.*
+deploy.env
+# Personal rows and the eval runs made from them; vercel.json's excludeFiles
+# also keeps them out of the function.
+data/
+evals/reports/
+.venv/
