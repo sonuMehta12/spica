@@ -153,3 +153,29 @@ async def test_categorise_runs_on_anthropic_too(anthropic):
     assert text == '{"rows": []}' and used == "claude-haiku-5-5@medium"
     assert fake.calls[0]["messages"] == [{"role": "user",
                                           "content": [{"type": "text", "text": '{"rows": []}'}]}]
+
+
+# ─── what a deploy shows when the model is wrong ─────────────────────────────
+
+session_loop = pytest.mark.asyncio(loop_scope="session")
+
+
+@session_loop
+async def test_a_chat_turn_whose_model_fails_says_so(client, fake):
+    """A key, a credit balance, the provider down: a 502 that says nothing was
+    written, not a bare 500 the app can only call 'not sent'."""
+    scripted = fake()
+
+    async def down(**kw):
+        raise TimeoutError("the model timed out")
+    scripted.responses.create = down
+    r = await client.post("/chat", json={"message": "hi", "local_day": "2026-10-11"})
+    assert r.status_code == 502, r.text
+    assert "nothing was written" in r.json()["detail"]
+
+
+@session_loop
+async def test_health_says_which_model_and_whether_its_key_is_set(client):
+    h = (await client.get("/health")).json()
+    assert set(h["llm"]) == {"provider", "model", "key_set"}
+    assert isinstance(h["llm"]["key_set"], bool), "a yes or no, never the key"

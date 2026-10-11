@@ -6,16 +6,19 @@ One thread per user, no streaming, cards not prose. `POST /chat` is a turn;
 model is given.
 """
 
+import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query, status
 
-from app.agent.runner import act, clear, history, reply
+from app.agent.runner import ModelFailed, act, clear, history, reply
 from app.auth import CurrentUser
 from app.config import settings
 from app.db import SessionDep
 from app.llm import model
 from app.schemas.chat import ActIn, ChatIn, ChatOut, HistoryOut, MessageOut
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(tags=["agent"])
 
@@ -58,7 +61,15 @@ async def chat(body: ChatIn, session: SessionDep, user: CurrentUser) -> ChatOut:
                   "You can still log, read and correct anything in the meantime.",
             cards=[], tokens_in=0, tokens_out=0, model="limit",
         )
-    turn = await reply(session, user, body.message, body.local_day, body.local_time)
+    try:
+        turn = await reply(session, user, body.message, body.local_day, body.local_time)
+    except ModelFailed as e:
+        # The model's fault — a key, a credit balance, the provider down — not
+        # the person's and not a bug here. Said plainly, and logged with its
+        # cause, as the first run's turn does; a bare 500 hid both.
+        log.warning("chat turn: the model call failed: %s", e)
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY,
+                            "the model could not be reached just now — nothing was written") from e
     return ChatOut(reply=turn.text, cards=turn.cards, tokens_in=turn.tokens_in,
                    tokens_out=turn.tokens_out, model=model())
 
