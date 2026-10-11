@@ -148,7 +148,8 @@ reason.
 |---|---|
 | `DATABASE_URL` | Neon's **direct** connection string (pooling off, no `-pooler` in the host), pasted as given |
 | `DB_NULL_POOL` | `true` |
-| `OPENAI_API_KEY` | the key — here and in GitHub's secrets, nowhere else |
+| `LLM_PROVIDER`, `LLM_MODEL` | `anthropic`, `claude-haiku-5-5` (spec/llm-provider.md) |
+| `ANTHROPIC_API_KEY` | the key — here and in GitHub's secrets, nowhere else |
 | `GOOGLE_CLIENT_ID` | the existing Web client ID, unchanged |
 | `ALLOWED_EMAILS` | the friends' Gmail addresses — never the owner's, who gets in by the claim (*Starting data*) |
 | `PUBLIC_URL` | `https://<api>.vercel.app` — the OAuth issuer and the base of `/mcp` |
@@ -159,7 +160,7 @@ reason.
 **Vercel, web project:** `VITE_API=https://<api>.vercel.app` (no trailing
 slash) and `VITE_GOOGLE_CLIENT_ID` as now.
 
-**GitHub, repo secrets:** `DATABASE_URL`, `OPENAI_API_KEY`, and
+**GitHub, repo secrets:** `DATABASE_URL`, `ANTHROPIC_API_KEY`, and
 `BACKUP_PASSPHRASE` for the backup.
 
 The two production addresses are baked into the web bundle and the APK.

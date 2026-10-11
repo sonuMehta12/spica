@@ -52,4 +52,7 @@ jobs:
         run: PYTHONPATH=. uv run --no-sync python scripts/run_due.py --quiet
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # The model the jobs write with — the same provider as the API.
+          LLM_PROVIDER: anthropic
+          LLM_MODEL: claude-haiku-5-5
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

@@ -32,6 +32,10 @@ TEST_URL = f"postgresql+asyncpg://cortex:cortex@localhost:5434/{TEST_DB}"
 # setting a test run depends on belongs here for the same reason — the turn
 # ceiling went missing the same way, and the agent went quiet after 100 turns.
 os.environ["DATABASE_URL"] = TEST_URL
+# The scripted model (tests/helpers.py FakeLLM) speaks the Responses API, so
+# the agent's tests run on that path whatever the default provider is; the
+# Anthropic translation has its own tests (test_llm_provider.py).
+os.environ["LLM_PROVIDER"] = "openai"
 # One database and one user for the whole run, so turns accumulate across
 # every test that talks to the agent. The ceiling is a production setting;
 # the test that asserts it sets it to zero itself.

@@ -149,7 +149,7 @@ token sent to them.
     `ALLOWED_EMAILS` on the API project (a change there needs a redeploy).
 11. **GitHub secrets.** Repository → Settings → Secrets and variables →
     Actions: `DATABASE_URL` (the same Neon string, as given),
-    `OPENAI_API_KEY`, and `BACKUP_PASSPHRASE` — a long random one kept in a
+    `ANTHROPIC_API_KEY`, and `BACKUP_PASSPHRASE` — a long random one kept in a
     password manager; losing it loses every backup. Leave the log retention
     setting alone: it also caps the backup's 30 days.
 12. **Turn the workflows on and run them once.** Actions → tick → Enable

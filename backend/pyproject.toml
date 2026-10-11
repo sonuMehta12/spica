@@ -21,6 +21,7 @@ dependencies = [
     # app/images.py fetches pictures with it; it used to arrive only through
     # another package, which is not a promise.
     "httpx>=0.28",
+    "anthropic>=1.13.0",
 ]
 
 [dependency-groups]

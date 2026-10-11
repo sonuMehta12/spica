@@ -99,13 +99,17 @@ class Settings(BaseSettings):
     #: is cheap; too small and each rewrite has to throw history away.
     chat_summary_words: int = 200
 
-    # Read only by app/llm.py. Switching vendor or model is these three lines
-    # and nothing else — the seam note there says why.
-    llm_provider: str = "openai"          # openai | anthropic
-    # gpt-6-luna since 2026-10-01 (gpt-5.6-luna from 2026-09-12): the same job —
-    # cheap, fast, tool-calling — one generation on, and it still takes effort
-    # "none". Checked against the live API before the switch.
-    llm_model: str = "gpt-6-luna"
+    # Read only by app/llm.py. Switching vendor or model is these lines — the
+    # provider, the model, the provider's key — and nothing else: the seam
+    # note there says why. Anthropic since 2026-10-11 (spec/llm-provider.md);
+    # OpenAI is `LLM_PROVIDER=openai` with `LLM_MODEL=gpt-6-luna`.
+    llm_provider: str = "anthropic"       # anthropic | openai
+    # Claude Haiku 5.5: the cheap, fast, tool-calling tier — the job Luna did.
+    # Its default effort is medium, the level the chat eval settled on.
+    llm_model: str = "claude-haiku-5-5"
+    # Anthropic's cap on one answer. Thinking counts against it, so it is far
+    # above any reply this app writes: a turn's text is a line or two.
+    llm_max_tokens: int = 16000
     # How hard the model thinks per call — the agent's, and the default for
     # every other call. **"medium"**, measured 2026-10-10 on the chat eval
     # (spec/done/chat-quality.md): the same day said three times, on the
@@ -113,8 +117,8 @@ class Settings(BaseSettings):
     # 97.9% of turns, none 93.8% and 97.5%. It costs ~0.3 s at the median and
     # ~2.7 s at p90 (4.7 s / 11.9 s against 4.4 s / 9.2 s) and ~70% more output
     # tokens — about ₹0.0015 a turn. It was "none" from 2026-09-15, when a
-    # three-prompt check found no gain; the eval's 79 cases found one. The
-    # model stays Luna: a bigger one is ruled out on cost.
+    # three-prompt check found no gain; the eval's 79 cases found one — on Luna;
+    # rerun the eval on Haiku before trusting the same number there.
     llm_effort: str = "medium"
     # How long one model call may take before it is retried. The SDK's own
     # default is ten minutes: one hung request held an eval turn for 611 s
