@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -147,38 +149,65 @@ fun DayHome(todayIso: String, now: String, rail: Rail, a: DayActions, modifier: 
 
 private val SHEET = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
 
-/** The week, Monday first. Today is the selection, in Jamun; days ahead are lighter. A picture of where you are — no day opens yet. */
+/** Weeks the strip can swipe to: a year back, eight weeks ahead. */
+private const val WEEKS_BACK = 52
+private const val WEEKS_AHEAD = 8
+
+/**
+ * The week, Monday first, swiped left and right a week at a time; it opens on
+ * this week. The box on its left names the month of the week showing. Today
+ * is in Jamun; `selected`, when it is another day, is a ring. A day opens only
+ * when `onDay` is given — until then the strip is a picture of where you are.
+ */
 @Composable
-private fun WeekStrip(today: String) {
-    val monday = Day.addDays(today, -Day.weekIndex(today))
+private fun WeekStrip(today: String, selected: String = today, onDay: ((String) -> Unit)? = null) {
+    val thisMonday = Day.addDays(today, -Day.weekIndex(today))
+    val pager = rememberPagerState(initialPage = WEEKS_BACK) { WEEKS_BACK + 1 + WEEKS_AHEAD }
+    val shownMonday = Day.addDays(thisMonday, (pager.currentPage - WEEKS_BACK) * 7)
+    // A week's month is its Thursday's, so a week across two months is named the way a calendar would.
+    val month = Day.monthName(Day.addDays(shownMonday, 3))
     Row(Modifier.fillMaxWidth().padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         // The month, beside its week: three letters in a box exactly the height of a day, so it sits on the same line.
         Box(
             Modifier.padding(end = 6.dp).size(width = 46.dp, height = 56.dp).clip(RoundedCornerShape(16.dp)).background(C.white)
-                .semantics { contentDescription = Day.monthName(today) },
+                .semantics { contentDescription = month },
             contentAlignment = Alignment.Center,
         ) {
-            Text(Day.monthName(today).take(3), style = T.day.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold))
+            Text(month.take(3), style = T.day.copy(fontSize = 13.sp, fontWeight = FontWeight.ExtraBold))
         }
-        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { i, name ->
-            val iso = Day.addDays(monday, i)
-            val isToday = iso == today
-            Column(
-                Modifier.weight(1f).semantics { contentDescription = "$name ${Day.dayOfMonth(iso)}" + if (isToday) ", today" else "" },
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(name, style = T.day.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, color = C.faint))
-                Box(
-                    Modifier.padding(top = 4.dp).size(36.dp).clip(CircleShape).background(if (isToday) C.brand else Color.Transparent),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        "${Day.dayOfMonth(iso)}",
-                        style = T.day.copy(
-                            fontSize = 16.sp, fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.Bold,
-                            color = when { isToday -> C.white; iso > today -> C.faint; else -> C.ink },
-                        ),
-                    )
+        HorizontalPager(pager, Modifier.weight(1f)) { page ->
+            val monday = Day.addDays(thisMonday, (page - WEEKS_BACK) * 7)
+            Row(Modifier.fillMaxWidth()) {
+                listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun").forEachIndexed { i, name ->
+                    val iso = Day.addDays(monday, i)
+                    val isToday = iso == today
+                    val isPicked = iso == selected && !isToday
+                    Column(
+                        Modifier
+                            .weight(1f)
+                            .then(if (onDay != null) Modifier.clip(RoundedCornerShape(16.dp)).tap { onDay(iso) } else Modifier)
+                            .semantics { contentDescription = "$name ${Day.dayOfMonth(iso)} ${Day.monthName(iso)}" + if (isToday) ", today" else "" },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(name, style = T.day.copy(fontSize = 12.sp, fontWeight = FontWeight.Medium, color = C.faint))
+                        Box(
+                            Modifier
+                                .padding(top = 4.dp)
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(if (isToday) C.brand else Color.Transparent)
+                                .then(if (isPicked) Modifier.border(2.dp, C.brand, CircleShape) else Modifier),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                "${Day.dayOfMonth(iso)}",
+                                style = T.day.copy(
+                                    fontSize = 16.sp, fontWeight = if (isToday) FontWeight.ExtraBold else FontWeight.Bold,
+                                    color = when { isToday -> C.white; iso > today -> C.faint; else -> C.ink },
+                                ),
+                            )
+                        }
+                    }
                 }
             }
         }
