@@ -81,6 +81,8 @@ data class WireMeal(
     val confidence: Double = 1.0,
     val deletedAt: String? = null,
     val occurredAt: String? = null,
+    /** The first dish among the meal's lines — its picture on Home. */
+    val dishId: String? = null,
 )
 
 /** A meal write's answer: the row, and the pantry moves it caused. */

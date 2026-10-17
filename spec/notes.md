@@ -994,3 +994,33 @@ question the Nudges design already answers one rule at a time. *Would change
 our mind:* the brief on Home being read and acted on (Suggested meals tapped,
 a task moved) often enough that waiting for the person to open Home is the
 thing in the way.
+
+## Home's day — what the canvas drew and the first build leaves out
+
+**Written 2026-10-17** with `spec/home-day-rail.md`. The canvas *Spica day
+sheets* drew these; each needs data or an action the app does not have yet,
+so the first build leaves them out rather than drawing them empty.
+
+- **Meditation as Up next, and its session sheet** (a 15:00 timer, the parts,
+  a guided video). The plan carries one workout and no meditation. *Would
+  change our mind:* the plan learning to suggest a sitting, with a timer that
+  logs the minutes when it ends.
+- **A bill on the rail on its due day**, with *Mark paid* · *Not yet*.
+  Commitments are monthly totals, not dated events on a day. *Would change
+  our mind:* commitments carrying a due day the person confirmed, and paying
+  from the card linking the spend to the commitment the way the chat does.
+- **Actions the cards drew but the app cannot do in one tap**: *Move to
+  tomorrow* on a task, *Do it now* and *Skip today* on a schedule. Each is a
+  write with its own undo. *Would change our mind:* the person doing these in
+  chat often enough that the sentence is the slow part.
+- **A picture for every exercise.** A library exercise shows its own picture
+  and link; one the model invented has neither. *Would change our mind:* the
+  plan reaching often enough for exercises outside the library that the
+  numbered mark becomes the usual sight.
+- **A run's targets as distance and pace.** The plan carries minutes only.
+  *Would change our mind:* the plan writing a distance, and Health Connect's
+  distance read back after the run.
+- **A nudge on the rail at Now**, in Spica's voice (serif), with the rows that
+  triggered it: the smoking pattern before it hits, protein falling short
+  before dinner (canvas row 5). It belongs to the nudges work,
+  `spec/in-progress/nudges.md`, not to Home.

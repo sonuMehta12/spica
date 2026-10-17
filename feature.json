@@ -521,7 +521,7 @@
           "id": "home-day-rail",
           "title": "Home as your day",
           "status": "in-progress",
-          "description": "Home on the phone becomes the day itself: the date and week on the ground, then a white sheet with what happened today at its time (spends, meals, habits, ticked tasks), Now, one Up next card, and the rest of today with round task boxes. Each row opens its widget as a sheet. The bell becomes a caret that slides in Today at a glance from the right: six key numbers and the nudges. One layer at a time. Built 2026-10-16 in the day look (Figtree, deepened mode colours), on trial on Home.",
+          "description": "Home on the phone becomes the day itself: the date and week on the ground, then a white sheet with what happened today at its time (spends, meals, habits, ticked tasks), Now, one Up next card, and the rest of today with round task boxes. Each row opens its widget as a sheet. The bell becomes a caret that slides in Today at a glance from the right: six key numbers and the nudges. One layer at a time. Built 2026-10-16 in the day look (Figtree, deepened mode colours), on trial on Home. 2026-10-17: each sheet drawn in the day look (Money, Diet, one habit, To-do, Activity as the session), the tapped row picked out; tapping a day in the week shows that day, past or ahead, and a sheet opened from it shows that day; the Up next card has one shape for every kind with the item's picture. The deck's meal names its dish, for the photo.",
           "spec": "spec/home-day-rail.md"
         },
         {

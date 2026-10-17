@@ -85,3 +85,32 @@ async def test_every_write_tool_tells_the_model_to_leave_the_time_out():
     for name in ("log_payment", "log_meal", "log_day"):
         t = BY_NAME[name]["schema"]["properties"]["time"]
         assert "leave it out" in t["description"], name
+
+
+# ─── a logged meal names its dish, for its picture ───────────────────────────
+
+async def test_a_meal_names_the_first_dish_among_its_lines(client, db_session):
+    """Home shows a logged meal's photo from its dish; the deck said nothing
+    about which dish, so the tile was always the bowl icon."""
+    from datetime import datetime, timezone
+    from sqlalchemy import text
+    from tests.test_dishes import make_dish
+    first = await make_dish(client, "Rail-dish rajma")
+    second = await make_dish(client, "Rail-dish salad")
+    m = (await make_meal(client, dish="Rail-dish rajma chawal", local_day="2026-08-23")).json()
+    meal_id = m["meal"]["id"]
+    lines = ((first, datetime(2026, 8, 23, 8, 0, 0, tzinfo=timezone.utc)),
+             (second, datetime(2026, 8, 23, 8, 0, 1, tzinfo=timezone.utc)))
+    for d, at in lines:
+        await db_session.execute(text("""
+            INSERT INTO meal_items (id, meal_log_id, dish_id, servings, created_at)
+            VALUES (:i, :m, :d, 1, :at)"""), {"i": ulid(), "m": meal_id, "d": d["id"], "at": at})
+    await db_session.commit()
+    rows = (await deck(client, "2026-08-23"))["diet"]["meals"]
+    assert next(x for x in rows if x["id"] == meal_id)["dish_id"] == first["id"]
+
+
+async def test_a_meal_of_foods_only_names_no_dish(client):
+    m = (await make_meal(client, dish="Rail-dish 2 boiled eggs", local_day="2026-08-23")).json()
+    rows = (await deck(client, "2026-08-23"))["diet"]["meals"]
+    assert next(x for x in rows if x["id"] == m["meal"]["id"])["dish_id"] is None

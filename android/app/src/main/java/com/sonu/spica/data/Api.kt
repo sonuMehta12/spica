@@ -25,6 +25,13 @@ object Api {
 
     suspend fun fetchDeck(to: String = Day.today()): DeckData = adapt(Http.get<WireDeck>("/deck?to=$to", "deck"))
 
+    /**
+     * One day of an earlier month, for Home's week strip. The server widens
+     * the window to that day's month for spends, so its month's money comes
+     * back with it; everything else is already on the phone.
+     */
+    suspend fun fetchDeckDay(day: String): DeckData = adapt(Http.get<WireDeck>("/deck?from=$day&to=$day", "deck"))
+
     fun toProfile(w: WireUser) = Profile(
         id = w.id,
         displayName = w.displayName,
@@ -87,6 +94,7 @@ object Api {
         date = m.localDay,
         deleted = m.deletedAt != null,
         at = instantOf(m.occurredAt),
+        dishId = m.dishId,
     )
 
     /** A source is free text on the wire; the known ones get their proper name. */

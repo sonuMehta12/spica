@@ -82,6 +82,9 @@ class MealOut(Row):
     note: str | None
     tags: list[str]
     confidence: float
+    #: The first dish among the meal's lines, for its picture on Home
+    #: (spec/home-day-rail.md § Pictures). Null for a meal of foods only.
+    dish_id: str | None = None
 
 
 class MealRowOut(MealOut):

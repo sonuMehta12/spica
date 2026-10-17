@@ -44,6 +44,10 @@ import com.sonu.spica.logic.DaySheet
 import com.sonu.spica.ui.day.DayActions
 import com.sonu.spica.ui.day.DayHome
 import com.sonu.spica.ui.day.DaySheetView
+import com.sonu.spica.ui.day.DaySource
+import com.sonu.spica.ui.day.SheetOpen
+import com.sonu.spica.ui.day.rememberDaySource
+import com.sonu.spica.logic.RailRow
 import com.sonu.spica.ui.day.GlancePanel
 import kotlinx.coroutines.delay
 import java.time.LocalTime
@@ -83,7 +87,12 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
             value = clockNow()
         }
     }
-    val rail = remember(s, now) { DayRail.rail(s, LocalTime.now()) }
+    // The day the sheet shows: today unless a day in the week was tapped.
+    var picked by rememberSaveable { mutableStateOf<String?>(null) }
+    val day = picked?.takeIf { it != s.todayIso } ?: s.todayIso
+    val source = rememberDaySource(s, day)
+    val rail = remember(source, now, day) { (source as? DaySource.Ready)?.let { DayRail.rail(it.s, day, LocalTime.now()) } }
+    val totals = remember(source, day) { (source as? DaySource.Ready)?.let { DayRail.totals(it.s, day) } }
     val numbers = remember(s, v) { DayRail.keyNumbers(s, v.diet.protein, v.diet.kcal) }
     LaunchedEffect(s.booted) { if (s.booted) vm.loadPlan() }
 
@@ -91,7 +100,8 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
     // screen, the menu or the composer taking over closes it too.
     var layer by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(atRoot, s.composing) { if (!atRoot || s.composing) layer = "" }
-    val openSheet: (DaySheet) -> Unit = { layer = SHEET + it.name }
+    val openSheet: (DaySheet) -> Unit = { layer = SHEET + SheetOpen(it, day).encode() }
+    val openRow: (RailRow) -> Unit = { r -> layer = SHEET + SheetOpen(r.sheet, day, r.key, r.habit).encode() }
     val openGlance: () -> Unit = {
         layer = GLANCE
         vm.glanceOpened()
@@ -163,8 +173,11 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
                     // a receipt's open choices in Chat never keep Home from leaving.
                     CompositionLocalProvider(LocalOnTop provides (atRoot && pager.currentPage == page)) {
                         if (page == HOME_PAGE) DayHome(
-                            s.todayIso, now, rail,
-                            DayActions(onRow = openSheet, onToggleTask = vm::toggleTodo, onLogPlanMeal = { vm.logPlanMeal(it) }, onDoneWorkout = { vm.doneWorkout(it) }),
+                            s.todayIso, day, now, source, rail, totals,
+                            DayActions(
+                                onRow = openRow, onSheet = openSheet, onDay = { picked = it.takeIf { d -> d != s.todayIso } },
+                                onToggleTask = vm::toggleTodo, onLogPlanMeal = { vm.logPlanMeal(it) }, onDoneWorkout = { vm.doneWorkout(it) },
+                            ),
                         )
                         else Conversation(vm, s, v, suggestions, Modifier.fillMaxSize())
                     }
@@ -187,7 +200,7 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
         GlancePanel(
             open = layer == GLANCE && atRoot, todayIso = s.todayIso, now = now, numbers = numbers,
             nudges = s.nudges.filter { !it.dismissed }.take(6), nudgesLoad = s.nudgesLoad,
-            onClose = { layer = "" }, onNumber = openSheet,
+            onClose = { layer = "" }, onNumber = { layer = SHEET + SheetOpen(it, s.todayIso).encode() },
             onNudge = { n ->
                 layer = ""
                 vm.openNudge(n)
@@ -197,9 +210,11 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
                 vm.openNudges()
             },
         )
-        if (layer.startsWith(SHEET) && atRoot) {
+        val sheet = if (layer.startsWith(SHEET)) SheetOpen.decode(layer.removePrefix(SHEET)) else null
+        val sheetSource = rememberDaySource(s, sheet?.day?.ifEmpty { null } ?: s.todayIso)
+        if (sheet != null && atRoot && sheetSource is DaySource.Ready) {
             DaySheetView(
-                DaySheet.valueOf(layer.removePrefix(SHEET)), vm, s, v, onConnectHealth = connectHealth,
+                sheet, vm, sheetSource.s, v, onConnectHealth = connectHealth,
                 onChat = {
                     layer = ""
                     go(CHAT_PAGE)

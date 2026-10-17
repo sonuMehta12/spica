@@ -17,7 +17,7 @@ from sqlalchemy import select
 
 from app.auth import CurrentUser
 from app.db import SessionDep
-from app.models.diet import Day, Habit, HabitLog, MealLog
+from app.models.diet import Day, Habit, HabitLog, MealItem, MealLog
 from app.models.paisa import BalanceCheck, Transaction
 from app.models.users import User
 from app.models.work import Project, SourceDocument, Task
@@ -94,6 +94,20 @@ async def deck(
                *window(MealLog.local_day, diet_from))
         .order_by(MealLog.local_day, MealLog.id)
     )).all()
+
+    # The dish a meal came from, so Home can show its picture: the first dish
+    # among its lines. One query for the lot; a meal of foods only has none.
+    if meals:
+        firsts: dict[str, str] = {}
+        for meal_id, dish_id in (await session.execute(
+            select(MealItem.meal_log_id, MealItem.dish_id)
+            .where(MealItem.meal_log_id.in_([m.id for m in meals]),
+                   MealItem.dish_id.is_not(None), MealItem.deleted_at.is_(None))
+            .order_by(MealItem.created_at, MealItem.id)
+        )).all():
+            firsts.setdefault(meal_id, dish_id)
+        for m in meals:
+            m.dish_id = firsts.get(m.id)
 
     habit_logs = (await session.scalars(
         select(HabitLog)

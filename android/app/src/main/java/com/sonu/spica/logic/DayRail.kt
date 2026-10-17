@@ -41,10 +41,22 @@ data class RailRow(
     val workout: PlanWorkout? = null,
     /** A schedule's own sentence, for its card. */
     val blurb: String? = null,
+    /** A habit log's habit — its sheet is that habit's alone. */
+    val habit: String? = null,
+    /** A schedule's repeat, said for its card: `Every day`, `Mon · Thu`. */
+    val repeat: String? = null,
+    /** Where a task came from — a meeting's title, `Linear · ENG-142`. */
+    val taskSource: String? = null,
 )
 
 /** The day: what happened, the one thing next, the rest with a time, the rest without. */
 data class Rail(val past: List<RailRow>, val next: RailRow?, val later: List<RailRow>, val anytime: List<RailRow>)
+
+/** Which day the rail shows, against today. */
+enum class DayKind { Past, Today, Ahead }
+
+/** A day's line of totals, each a dash when the day has no rows of its kind. */
+data class DayTotals(val spent: String, val protein: String, val tasksDone: String, val empty: Boolean)
 
 /** A key number in the glance panel. Unknown is a dash, never 0. */
 data class KeyNumber(val sheet: DaySheet, val value: String, val label: String, val labelIsLate: Boolean = false)
@@ -104,9 +116,47 @@ object DayRail {
         else -> "th"
     }
 
-    fun rail(s: AppState, now: LocalTime): Rail {
-        val today = s.todayIso
-        val nowMin = now.hour * 60 + now.minute
+    fun kindOf(day: String, today: String) = when {
+        day < today -> DayKind.Past
+        day > today -> DayKind.Ahead
+        else -> DayKind.Today
+    }
+
+    /** A schedule's repeat in words: every day, or its weekdays. */
+    fun repeatOf(repeat: String, days: List<Int>): String =
+        if (repeat != "weekly" || days.size == 7) "Every day"
+        else days.sorted().joinToString(" · ") { listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")[it] }
+
+    /** Spends, meals and ticked tasks of one day, live from the rows. */
+    fun spendsOn(s: AppState, day: String) =
+        (s.tx + s.fixedTx).filter { (it.date ?: s.todayIso) == day && !it.deleted && it.id !in s.deletedRows && !it.credit }
+
+    fun mealsOn(s: AppState, day: String) =
+        s.meals.filter { (it.date ?: s.todayIso) == day && !it.deleted && it.id !in s.deletedRows }
+
+    fun totals(s: AppState, day: String): DayTotals {
+        val spends = spendsOn(s, day)
+        val meals = mealsOn(s, day)
+        val done = s.todos.count { it.done && it.doneOn == day }
+        return DayTotals(
+            spent = if (spends.isEmpty()) "— spent" else "${Fmt.rupees(-spends.sumOf { it.amt })} spent",
+            protein = if (meals.isEmpty()) "— protein" else "${Fmt.grams(meals.sumOf { it.p })} protein",
+            tasksDone = when (done) { 0 -> "no tasks done"; 1 -> "1 task done"; else -> "$done tasks done" },
+            empty = spends.isEmpty() && meals.isEmpty() && done == 0 && s.habitLogs.none { it.date == day },
+        )
+    }
+
+    /**
+     * The rail for any day. Today: what happened, Now, what is ahead. A past
+     * day: what happened, nothing ahead. A day ahead: its schedules at their
+     * times and the tasks due that day — the plan is made on the day.
+     */
+    fun rail(s: AppState, day: String, now: LocalTime): Rail {
+        val kind = kindOf(day, s.todayIso)
+        if (kind == DayKind.Ahead) return ahead(s, day)
+        val today = day
+        val isToday = kind == DayKind.Today
+        val nowMin = if (isToday) now.hour * 60 + now.minute else 24 * 60
         val gone = s.deletedRows.toSet()
 
         // What happened today, each at its own moment.
@@ -132,7 +182,8 @@ object DayRail {
                 logs.forEachIndexed { i, h ->
                     happened += h.at to RailRow(
                         key = "habit:${h.id}", kind = RailKind.Habit, sheet = DaySheet.Habits, time = "",
-                        title = title(h.habit), figure = if (name in cutting) "${ordinal(i + 1)} today" else null, done = true,
+                        title = title(h.habit), figure = if (name in cutting) "${ordinal(i + 1)} ${if (isToday) "today" else "that day"}" else null, done = true,
+                        habit = h.habit,
                     )
                 }
             }
@@ -145,6 +196,8 @@ object DayRail {
         // Oldest first; a row whose time is unknown waits at the end, its time a dash.
         val past = happened.sortedWith(compareBy<Pair<Instant?, RailRow>> { it.first == null }.thenBy { it.first })
             .map { (at, r) -> r.copy(time = at?.let(::clock) ?: "—") }
+
+        if (!isToday) return Rail(past, null, emptyList(), emptyList())
 
         // What is still ahead, with a time or a slot.
         val ahead = mutableListOf<Pair<Int, RailRow>>()
@@ -162,14 +215,15 @@ object DayRail {
             val min = (parts.getOrNull(0)?.toIntOrNull() ?: 0) * 60 + (parts.getOrNull(1)?.toIntOrNull() ?: 0)
             if (min > nowMin) ahead += min to RailRow(
                 key = "schedule:${sc.id}", kind = RailKind.Schedule, sheet = DaySheet.Work, time = sc.at.take(5),
-                title = title(sc.label), blurb = cap(sc.blurb),
+                title = title(sc.label), blurb = cap(sc.blurb), repeat = repeatOf(sc.repeat, sc.days),
             )
         }
         val timed = ahead.sortedBy { it.first }.map { it.second }
 
         // What is due today or late, and the plan's workout: no clock time of their own.
         val anytime = mutableListOf<RailRow>()
-        s.plan?.workout?.takeIf { "workout" !in s.planDone && s.plan?.done != true }?.let { w ->
+        // A rest day has no row: nothing to do, nothing to open (spec/home-day-rail.md § Decided against).
+        s.plan?.workout?.takeIf { it.kind != "rest" && "workout" !in s.planDone && s.plan?.done != true }?.let { w ->
             anytime += RailRow(
                 key = "workout", kind = RailKind.Workout, sheet = DaySheet.Activity, time = "",
                 title = title(w.name), figure = w.minutes?.let { "$it min" }, estimate = w.idea, workout = w,
@@ -179,7 +233,7 @@ object DayRail {
             anytime += RailRow(
                 key = "task:${t.id}", kind = RailKind.Task, sheet = DaySheet.Work, time = "",
                 title = title(t.name), sub = Tasks.projectOf(t.project, s.projects)?.name?.let(::title) ?: "No project",
-                late = if (t.due!! < today) Tasks.dueLabel(t.due, today) else null, taskId = t.id,
+                late = if (t.due!! < today) Tasks.dueLabel(t.due, today) else null, taskId = t.id, taskSource = t.src,
             )
         }
 
@@ -191,6 +245,26 @@ object DayRail {
             later = timed.filter { it !== next },
             anytime = anytime.filter { it !== next },
         )
+    }
+
+    private fun ahead(s: AppState, day: String): Rail {
+        val weekday = Day.weekIndex(day)
+        val timed = s.schedules.filter { it.enabled && (it.repeat != "weekly" || weekday in it.days) }
+            .sortedBy { it.at }
+            .map { sc ->
+                RailRow(
+                    key = "schedule:${sc.id}", kind = RailKind.Schedule, sheet = DaySheet.Work, time = sc.at.take(5),
+                    title = title(sc.label), blurb = cap(sc.blurb), repeat = repeatOf(sc.repeat, sc.days),
+                )
+            }
+        val due = Tasks.sortTasks(s.todos.filter { !it.done && it.due == day }).map { t ->
+            RailRow(
+                key = "task:${t.id}", kind = RailKind.Task, sheet = DaySheet.Work, time = "",
+                title = title(t.name), sub = Tasks.projectOf(t.project, s.projects)?.name?.let(::title) ?: "No project",
+                taskId = t.id, taskSource = t.src,
+            )
+        }
+        return Rail(emptyList(), null, timed, due)
     }
 
     /** The glance panel's six numbers, each counted from the rows now. */

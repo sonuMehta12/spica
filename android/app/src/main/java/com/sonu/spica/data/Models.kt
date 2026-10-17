@@ -75,6 +75,8 @@ data class Meal(
     val at: java.time.Instant? = null,
     val deleted: Boolean = false,
     val confidence: Double? = null,
+    /** The dish it came from, when one matched — for its picture. */
+    val dishId: String? = null,
 )
 
 enum class TaskKind { Work, Paisa, Diet }
