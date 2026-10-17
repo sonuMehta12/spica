@@ -28,10 +28,23 @@ from app.models.work import Project, Task
 
 #: A new project's colour, from the app's own palette — stored on the row, so
 #: it is the same on every device (spec/done/work-data-model.md).
-PALETTE = ("#16604A", "#C98A16", "#A6412E", "#8A5E0B", "#1D7A5E", "#5A6158", "#7A8578")
+#:
+#: The Work hue's family (THEME.md § Colour): OKLCH hue 230–255, stepped by
+#: lightness and chroma, every one a mark at 3 : 1 or better on white and at
+#: least 80° of hue from Jamun (335). It was the pre-Jamun greens and ambers,
+#: and amber is the estimate dot's alone. Ordered so neighbours differ.
+#:   #286CAB L .52 C .12 H 250 · 5.5 : 1      #3A95CD L .64 C .12 H 240 · 3.3
+#:   #285388 L .44 C .10 H 255 · 7.8          #1785AF L .58 C .11 H 230 · 4.2
+#:   #6588B6 L .62 C .08 H 255 · 3.7          #2E6386 L .48 C .08 H 240 · 6.5
+#:   #5E93CA L .65 C .10 H 250 · 3.2
+PALETTE = ("#286CAB", "#3A95CD", "#285388", "#1785AF", "#6588B6", "#2E6386", "#5E93CA")
+#: The palette before Jamun, position for position — the migration that moved
+#: existing projects reads it.
+OLD_PALETTE = ("#16604A", "#C98A16", "#A6412E", "#8A5E0B", "#1D7A5E", "#5A6158", "#7A8578")
 DEFAULT_NAME = "Personal"
 DEFAULT_KEY = "personal"
-GREY = "#7A8578"
+#: The default project's neutral: `faint`, leaning to Jamun, 4.9 : 1 on white.
+GREY = "#747073"
 
 #: The named icons the app ships, Notion-style, beside any emoji. The frontend
 #: draws them (`ProjectIcon.tsx`); the server only checks the name exists.

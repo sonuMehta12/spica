@@ -435,3 +435,29 @@ async def test_a_number_is_a_whole_word_not_a_digit_inside_one(client, db_sessio
     found = await tool(db_session, "save_task", task=f"{proj['name']} wala 3 recipes dikhane",
                        done=True)
     assert found.get("task_id") == target["task_id"], found
+
+
+# ─── colour: the Work hue's family ───────────────────────────────────────────
+
+async def test_a_new_project_takes_a_colour_from_the_work_hue_never_amber(client):
+    """The palette was the pre-Jamun greens and ambers; amber is the estimate
+    dot's alone (THEME.md § Colour). TODO.md § Project colours."""
+    from app import projects as P
+    made = (await client.post("/projects", json={"id": ulid(), "name": name("Hue")})).json()
+    assert made["color"] in P.PALETTE, made["color"]
+    assert not set(P.PALETTE) & set(P.OLD_PALETTE)
+
+
+def test_every_project_colour_is_blue_and_readable_as_a_mark():
+    """Work's family: blue the largest channel, and 3 : 1 on white for a bar."""
+    from app import projects as P
+
+    def lum(h):
+        v = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        v = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in v]
+        return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
+
+    for c in P.PALETTE:
+        r, g, b = (int(c[i:i + 2], 16) for i in (1, 3, 5))
+        assert b > r and b > g, c
+        assert 1.05 / (lum(c) + 0.05) >= 3.0, c
