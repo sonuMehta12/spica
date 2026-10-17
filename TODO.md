@@ -84,13 +84,6 @@ remembers.
       pin. Decide the scope and the tool calls first; `spec/in-progress/
       places.md` is where it goes.
 
-- [ ] **Project colours from the Work hue, not the old palette.** The bars on
-      To-do and Reports draw each project's stored colour, which the server
-      picks from the pre-Jamun palette (`PALETTE` in `backend/app/projects.py`:
-      greens and ambers — amber is the estimate dot's alone). New colours
-      come from the work hue's family (`THEME.md` § Colour), and existing
-      rows are migrated.
-
 ## Data
 
 - [ ] **Populate `foods` with commercial and packaged food sold in Delhi.**
@@ -139,11 +132,6 @@ remembers.
       reaches the laptop — can never be authorized. Either tunnel the page to
       an https hostname or wait for the hosting move, which is the next release
       prerequisite anyway. The laptop browser is unaffected.
-
-- [ ] **Delete the downloaded `client_secret_*.json`.**
-      The ID-token flow never exchanges a code, so the secret in it is unused
-      and only the client ID was taken. A secret nothing reads is a secret
-      waiting to leak.
 
 - [ ] **When the domain and hosting land, three things change together.**
       Vercel serves the page; it is the wrong host for this API — FastAPI holds
