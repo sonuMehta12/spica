@@ -352,7 +352,7 @@ private fun NextCard(r: RailRow, a: DayActions) {
                 maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 7.dp),
             )
             val line = when (r.kind) {
-                RailKind.PlanMeal -> r.planMeal?.let { "${Fmt.grams(it.protein)} protein · ${Fmt.indian(it.kcal)} kcal" }
+                RailKind.PlanMeal -> r.planMeal?.let { "${r.sub?.let { s -> "$s · " } ?: ""}${Fmt.grams(it.protein)} protein · ${Fmt.indian(it.kcal)} kcal" }
                 RailKind.Workout -> r.workout?.minutes?.let { "$it min" }
                 RailKind.Schedule -> r.blurb
                 RailKind.Task -> r.sub

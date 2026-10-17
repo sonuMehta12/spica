@@ -151,7 +151,8 @@ object DayRail {
         s.plan?.meals.orEmpty().filter { "meal:${it.slot}" !in s.planDone }.forEach { m ->
             ahead += slotMinute(m.slot) to RailRow(
                 key = "plan:${m.slot}", kind = RailKind.PlanMeal, sheet = DaySheet.Diet,
-                time = cap(m.slot), title = title(m.name),
+                // The slot is not a clock: it goes under the title, the time column stays empty.
+                time = "", sub = cap(m.slot), title = title(m.name),
                 figure = Fmt.grams(m.protein), estimate = m.idea, planMeal = m,
             )
         }
