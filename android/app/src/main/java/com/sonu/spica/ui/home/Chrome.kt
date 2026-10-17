@@ -118,13 +118,15 @@ private fun BarDisc(onClick: () -> Unit, modifier: Modifier = Modifier, enabled:
 }
 
 /**
- * The bell: Nudges, a tap away. A Jamun dot when a nudge was written since it
- * was last opened — no count and no red: a number to clear is a chore.
+ * The caret where the bell was: today at a glance — the key numbers and the
+ * nudges — slides in from the right, the way it points. A Jamun dot when a
+ * nudge was written since it was last opened — no count and no red: a number
+ * to clear is a chore. `spec/home-day-rail.md`.
  */
 @Composable
 private fun Bell(dot: Boolean, onClick: () -> Unit) {
     Box(Modifier.size(DISC)) {
-        BarDisc(onClick, Modifier.semantics { if (dot) stateDescription = "New" }) { Glyph(Ph.bell, 21.dp, C.ink, label = "Nudges") }
+        BarDisc(onClick, Modifier.semantics { if (dot) stateDescription = "New" }) { Glyph(Ph.caretLeft, 20.dp, C.ink, label = "Today at a glance") }
         if (dot) {
             Box(
                 Modifier

@@ -927,3 +927,70 @@ surfaces (THEME.md § *Back*). Six things were left out on purpose.
   clear it first; a control in the *Moves · food* tab is left for the Pantry's
   own pass, so it lands on both surfaces at once. *Would change our mind:*
   that pass, or someone stuck in a filtered History.
+
+---
+
+## Reminders that repeat within a day
+
+**Deferred, 2026-10-12** (`spec/in-progress/reminders.md`). *"Har 2 ghante
+paani peena yaad dilana"* is not supported: a reminder repeats once, daily,
+weekly or monthly, at one time of day. A reminder every few hours is a
+notification machine — the textbook nag people mute, and once they mute
+Spica's channel, the reminder they did need is muted with it. Drinking water
+is a habit (`spec/done/habits.md`), counted when it is done, not pinged.
+
+*Would change our mind:* the person setting two or three daily reminders for
+the same thing at different hours, by hand, more than once. That shows they
+want it, and a `times` list on one reminder would be the smallest form.
+
+---
+
+## Curated recipe and activity data
+
+**Brainstormed and deferred 2026-10-12; moved to a spec the same day** —
+`spec/in-progress/curated-data.md`. The question it held — whether Haiku with
+a prompt and rules needs curated data at all — was answered *both*: the model
+judges the plate, the data values it, and a two-arm eval decides whether the
+switch ships. Kept here so the deferral is not mistaken for an oversight.
+
+---
+
+## Mood — what waits
+
+**Written 2026-10-15** with `spec/in-progress/mood.md`. Four things the first
+version leaves out on purpose:
+
+- **A mood character.** The Morrow prototype's soft creature that mirrors how
+  you feel. Out because the agent has no face (THEME.md) and a creature that
+  looks sad because you are sad invites guilt; the dots on the map do the
+  mirroring. *Would change our mind:* check-ins dropping off once the novelty
+  of the dots fades, and a three-way test (a character, the dots, plain text)
+  in which the character wins on return and not only on charm.
+- **Check-ins started by the data.** Three short nights and two late tasks →
+  *"how are you holding up?"*, unasked. It is the companion's open question
+  (§ AI life companion): the first unprompted sentence about how someone
+  feels. Built wrong, it reads as being watched. *Would change our mind:* the
+  evening check-in being kept on and answered for a month. That would show
+  the person wants Spica to ask.
+- **Generated, personal meditations.** The person asks ChatGPT for these
+  today. Out until the fixed scripts are reviewed and used, because guidance
+  nobody reviewed reaches someone at their worst moment. *Would change our
+  mind:* the library running thin in real use, plus a review step for what
+  the model writes.
+- **Sharing with a therapist or a friend.** How We Feel has it. It sits close
+  to export, which is settled as no. *Would change our mind:* the person
+  asking for it for a real appointment. A read-only, time-boxed share of the
+  Mood page would then be its own decision.
+
+## Home's brief as a notification
+
+**Written 2026-10-16** with the day-rail Home design (row L on the *Spica mood*
+canvas). At Now, Home carries a short brief in Spica's voice, written fresh
+from today's rows each time Home opens and never stored. The same brief
+could arrive as a notification at the moments it changes: before lunch,
+after the second cigarette, when a task slips. Out for now because a
+notification is Spica speaking first, which is the unprompted-sentence
+question the Nudges design already answers one rule at a time. *Would change
+our mind:* the brief on Home being read and acted on (Suggested meals tapped,
+a task moved) often enough that waiting for the person to open Home is the
+thing in the way.

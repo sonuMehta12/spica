@@ -80,6 +80,34 @@ object C {
     val workInk = Color(0xFF125289)
     val workTint = Color(0xFFE7F5FF)
 
+    /* The day look — Home's day rail and glance panel only, on trial
+       (THEME.md § The day look). The three modes deepened together in OKLCH:
+       base L 0.52 C 0.117, ink L 0.38 C 0.086, soft L 0.80 C 0.075, mist
+       L 0.89 C 0.045, tint L 0.966 C 0.016 — one lightness and chroma, hue
+       says which (160 · 55 · 250), all in gamut. A solid node carries a white
+       glyph: white on base 5.2 · 5.7 · 5.5 : 1. Ink on tint 8.7 · 9.3 · 9.1. */
+    val deepPaisa = Color(0xFF027D51)
+    val deepPaisaInk = Color(0xFF005032)
+    val deepPaisaSoft = Color(0xFF93CDAD)
+    val deepPaisaMist = Color(0xFFC2E4D1)
+    val deepPaisaTint = Color(0xFFEBF7F0)
+
+    val deepDiet = Color(0xFF9B5418)
+    val deepDietInk = Color(0xFF64340B)
+    val deepDietSoft = Color(0xFFE4B290)
+    val deepDietMist = Color(0xFFF3D4BF)
+    val deepDietTint = Color(0xFFFDF1EA)
+
+    val deepWork = Color(0xFF2B6CA9)
+    val deepWorkInk = Color(0xFF18446E)
+    val deepWorkSoft = Color(0xFF99C2ED)
+    val deepWorkMist = Color(0xFFC5DEF8)
+    val deepWorkTint = Color(0xFFECF5FF)
+
+    /** Habits are counted in ink, never judged: the neutral, leaning to Jamun. White on it 9.3 : 1. */
+    val deepHabit = Color(0xFF4B4649)
+    val deepHabitMist = Color(0xFFE4E1E3)
+
     /* The estimate dot, and nothing else — gold, dark enough to count as a
        mark. 3.1 : 1. */
     val amber = Color(0xFFC58500)
@@ -139,6 +167,16 @@ object F {
 
     /** Data is the same face in grey — no mono. The name stays so every call site moved at once. */
     val mono = sans
+
+    /**
+     * Figtree (Erik Kennedy, OFL) — the day look, on Home's day rail and
+     * glance panel only, on trial. Friendly and geometric, heavy for titles
+     * and numbers; it draws ₹, the true minus and tabular figures (checked in
+     * the file).
+     */
+    val day = FontFamily(
+        weights(R.font.figtree, FontStyle.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold, FontWeight.ExtraBold),
+    )
 }
 
 /** Every number lines up: ₹1,100 and ₹8,880 are the same width. */
@@ -162,4 +200,7 @@ object T {
     val mono = TextStyle(fontFamily = F.mono, color = C.muted, fontFeatureSettings = TNUM)
     val sans = TextStyle(fontFamily = F.sans, color = C.ink, fontFeatureSettings = TNUM)
     val display = TextStyle(fontFamily = F.display, fontWeight = FontWeight.Medium, color = C.ink, fontFeatureSettings = TNUM)
+
+    /** The day look's face, figures tabular. Weight and size set where used: heavy for titles and numbers, medium for the grey lines. */
+    val day = TextStyle(fontFamily = F.day, color = C.ink, fontFeatureSettings = TNUM)
 }

@@ -101,6 +101,8 @@ class HabitLogOut(Row):
     id: str
     habit_id: str
     local_day: date
+    # Home's day rail places each log at the time it happened (spec/home-day-rail.md).
+    occurred_at: datetime
     amount: float | None
     note: str | None
 

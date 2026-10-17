@@ -41,6 +41,8 @@ data class Tx(
     /** ISO local day. */
     val date: String? = null,
     /** Soft-deleted on the server. Only the by-id read returns such rows. */
+    /** When it happened, if the server said — Home's day rail places the row there. Null is unknown, never guessed. */
+    val at: java.time.Instant? = null,
     val deleted: Boolean = false,
     /** Below 1 means a value on it was the agent's guess — the amber dot. */
     val confidence: Double? = null,
@@ -69,6 +71,8 @@ data class Meal(
     val pending: Boolean = false,
     val failed: Boolean = false,
     val date: String? = null,
+    /** When it was eaten, if the server said. */
+    val at: java.time.Instant? = null,
     val deleted: Boolean = false,
     val confidence: Double? = null,
 )
@@ -81,6 +85,8 @@ data class Todo(
     val done: Boolean,
     val kind: TaskKind,
     /** The ISO local day it was ticked. */
+    /** The moment it was ticked, when the server knows it — the day rail's place for it. */
+    val doneAt: java.time.Instant? = null,
     val doneOn: String? = null,
     val project: String? = null,
     /** The model chose the project, not the person — the amber dot. */

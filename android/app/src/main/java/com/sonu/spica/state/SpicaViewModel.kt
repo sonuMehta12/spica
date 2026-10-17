@@ -104,14 +104,12 @@ class SpicaViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun savedBell(): Instant? = prefs.getString(BELL_KEY, null)?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
-    private fun wantsPlan() =
-        HomeWidget.Meals.id in s.homeWidgets || HomeWidget.Workout.id in s.homeWidgets || s.stack.any { it is Screen.Nudge } ||
-            (Screen.Nudges in s.stack && s.nudges.any { it.kind == "meals" && it.line == null && it.day == s.todayIso && !it.dismissed })
+    // Home's day rail always shows what the plan has left for today (spec/home-day-rail.md).
+    private fun wantsPlan() = true
 
     /**
-     * Today's plan, from the server, only while Meals or Workout is on Home —
-     * or a nudge's page that shows it is open, or Nudges with a Meals today
-     * card whose line is the plan's.
+     * Today's plan, from the server: Home's day rail draws what it has left
+     * for today, so it is always wanted.
      * Read on boot, on resume and after every write; the server reuses its
      * plan until something it read changes, so most reads are no model call.
      * A failed read keeps whatever was showing.
@@ -989,6 +987,17 @@ class SpicaViewModel(app: Application) : AndroidViewModel(app) {
             loadPlan()
             if (s.nudges.any { n -> n.scheduleId != null && s.schedules.none { it.id == n.scheduleId } }) runCatching { loadSchedules() }
         }
+    }
+
+    /**
+     * The glance panel opened from Home's caret: it holds the nudges, so it
+     * clears the dot the way the bell did, and reads them fresh.
+     */
+    fun glanceOpened() {
+        val now = Instant.now()
+        prefs.edit().putString(BELL_KEY, now.toString()).apply()
+        patch { copy(bellOpenedAt = now) }
+        launch { loadNudges() }
     }
 
     /** Which page a kind opens. Reminder and review have none yet. */
@@ -2133,7 +2142,8 @@ class SpicaViewModel(app: Application) : AndroidViewModel(app) {
             copy(todos = todos.map {
                 // Stamping the day keeps a finished task on the card for today.
                 // A tracker's task reminds the moment it is ticked.
-                if (it.id == id) it.copy(done = done, doneOn = if (done) todayIso else null, awaitingMove = done && it.tracked) else it
+                // The moment is the tick's own, as the server stamps it: the day rail places it there.
+                if (it.id == id) it.copy(done = done, doneOn = if (done) todayIso else null, doneAt = if (done) java.time.Instant.now() else null, awaitingMove = done && it.tracked) else it
             })
         }
         launch {

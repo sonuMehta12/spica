@@ -19,6 +19,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -34,11 +39,26 @@ import com.sonu.spica.ui.chat.Conversation
 import com.sonu.spica.ui.common.LocalOnTop
 import com.sonu.spica.ui.common.layerFocus
 import com.sonu.spica.ui.theme.C
+import com.sonu.spica.logic.DayRail
+import com.sonu.spica.logic.DaySheet
+import com.sonu.spica.ui.day.DayActions
+import com.sonu.spica.ui.day.DayHome
+import com.sonu.spica.ui.day.DaySheetView
+import com.sonu.spica.ui.day.GlancePanel
+import kotlinx.coroutines.delay
+import java.time.LocalTime
 import kotlinx.coroutines.launch
 
+/** The wall clock as `12:40`, for Now and the glance panel. */
+private fun clockNow(): String = LocalTime.now().let { "%02d:%02d".format(it.hour, it.minute) }
+
+/** Home's one open layer, if any: the glance panel, or one widget's sheet. Never two at once. */
+private const val GLANCE = "glance"
+private const val SHEET = "sheet:"
+
 /**
- * Agent hi app hai, on two pages: Home on the left — today's tasks, Money,
- * Diet, Activity and Habits at a glance — and the conversation on the right. The pill in the bar
+ * Agent hi app hai, on two pages: Home on the left — the day as one rail,
+ * with the numbers and the nudges a tap away — and the conversation on the right. The pill in the bar
  * and a swipe both switch; the composer sits at the foot of both, and
  * anything that means talking moves to Chat.
  */
@@ -55,6 +75,27 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
     val go: (Int) -> Unit = { page -> scope.launch { pager.animateScrollToPage(page) } }
 
     val atRoot = s.stack.isEmpty()
+
+    // The day's clock: Now moves with the minute, and the rail with it.
+    val now by produceState(clockNow()) {
+        while (true) {
+            delay(15_000)
+            value = clockNow()
+        }
+    }
+    val rail = remember(s, now) { DayRail.rail(s, LocalTime.now()) }
+    val numbers = remember(s, v) { DayRail.keyNumbers(s, v.diet.protein, v.diet.kcal) }
+    LaunchedEffect(s.booted) { if (s.booted) vm.loadPlan() }
+
+    // One layer at a time over Home: opening one closes the other, and a
+    // screen, the menu or the composer taking over closes it too.
+    var layer by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(atRoot, s.composing) { if (!atRoot || s.composing) layer = "" }
+    val openSheet: (DaySheet) -> Unit = { layer = SHEET + it.name }
+    val openGlance: () -> Unit = {
+        layer = GLANCE
+        vm.glanceOpened()
+    }
 
     // Talking happens in Chat: the composer's focus, the tray, a Change or the
     // mic on Home all slide there first, so the answer lands where you look.
@@ -115,13 +156,16 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
         // screen reader, no focus, and no back for anything open in it.
         CompositionLocalProvider(LocalOnTop provides atRoot) {
             Column(Modifier.fillMaxSize().statusBarsPadding().then(layerFocus(atRoot)).then(if (atRoot) Modifier else Modifier.clearAndSetSemantics {})) {
-                TopBar(pager, go, vm::openMenu, vm::clearConversation, s.chat.size > 1, s.chatClearing, vm::openNudges, s.bellDot)
+                TopBar(pager, go, vm::openMenu, vm::clearConversation, s.chat.size > 1, s.chatClearing, openGlance, s.bellDot)
                 // Both pages stay composed, so the thread keeps its place while you look at Home.
                 HorizontalPager(pager, Modifier.weight(1f), beyondViewportPageCount = 1) { page ->
                     // The page beside this one is drawn too, but Back belongs to the one you see:
                     // a receipt's open choices in Chat never keep Home from leaving.
                     CompositionLocalProvider(LocalOnTop provides (atRoot && pager.currentPage == page)) {
-                        if (page == HOME_PAGE) HomePage(vm, s, v, onChat = { go(CHAT_PAGE) }, onConnectHealth = connectHealth)
+                        if (page == HOME_PAGE) DayHome(
+                            s.todayIso, now, rail,
+                            DayActions(onRow = openSheet, onToggleTask = vm::toggleTodo, onLogPlanMeal = { vm.logPlanMeal(it) }, onDoneWorkout = { vm.doneWorkout(it) }),
+                        )
                         else Conversation(vm, s, v, suggestions, Modifier.fillMaxSize())
                     }
                 }
@@ -137,6 +181,34 @@ fun Home(vm: SpicaViewModel, s: AppState, onSignedOut: () -> Unit) {
                 focusOnMount = s.composing,
             )
         }
+
+        // Today at a glance, from the caret: the key numbers and the nudges.
+        // A tile opens its widget — the panel closes as the sheet opens.
+        GlancePanel(
+            open = layer == GLANCE && atRoot, todayIso = s.todayIso, now = now, numbers = numbers,
+            nudges = s.nudges.filter { !it.dismissed }.take(6), nudgesLoad = s.nudgesLoad,
+            onClose = { layer = "" }, onNumber = openSheet,
+            onNudge = { n ->
+                layer = ""
+                vm.openNudge(n)
+            },
+            onAllNudges = {
+                layer = ""
+                vm.openNudges()
+            },
+        )
+        if (layer.startsWith(SHEET) && atRoot) {
+            DaySheetView(
+                DaySheet.valueOf(layer.removePrefix(SHEET)), vm, s, v, onConnectHealth = connectHealth,
+                onChat = {
+                    layer = ""
+                    go(CHAT_PAGE)
+                },
+                onDismiss = { layer = "" },
+            )
+        }
+        // Back closes the open layer before anything else on Home.
+        BackHandler(enabled = atRoot && layer == GLANCE) { layer = "" }
 
         // The menu, every page, each level inside one: the back stack, in order.
         Overlays(vm, s, v, composerActions, home = if (pager.currentPage == CHAT_PAGE) "Chat" else "Home") { vm.signOut(onSignedOut) }

@@ -1,6 +1,6 @@
 {
   "$comment": "Spica roadmap. Sequence matters — each feature assumes the ones above it. Status: done | in-progress | pending | blocked.",
-  "updated": "2026-10-10",
+  "updated": "2026-10-15",
   "phases": [
     {
       "phase": "0 · Web version",
@@ -393,6 +393,13 @@
           "status": "pending",
           "description": "What to eat, worked out as the engine spec says — the day's gap, the slots left, the pantry, what they actually eat — not looked up in the library at one serving. Ideas beyond the library, sized portions, one reasoning for chat and Home, and a first day that works. To design before building.",
           "spec": "spec/in-progress/meal-suggestion.md"
+        },
+        {
+          "id": "curated-data",
+          "title": "Curated data — the model judges, the data values",
+          "status": "pending",
+          "description": "IFCT 2017 (USDA as fallback) values every ingredient the estimator names, in raw grams with oil as its own line; INDB recipes join the public dish pool, computed from their ingredients; exercises gain Compendium MET values, and calories are worked out from the latest weigh-in. Only licensed sources become rows. Ships only if a two-arm eval on the 30 tracked meals beats the model alone. Drafted 2026-10-12.",
+          "spec": "spec/in-progress/curated-data.md"
         }
       ]
     },
@@ -475,6 +482,13 @@
           "status": "pending",
           "description": "Future scope. The same MCP server work sync builds, exposing the rest of the tool registry so Claude Code and the Claude app can read and write all three modes — aaj ka limit, aaj ka to-do, meal plan, log it. Carries ~99% of the model spend if it ever moves chat onto a subscription surface.",
           "spec": "spec/agent-everywhere.md"
+        },
+        {
+          "id": "project-spaces",
+          "title": "Project spaces — each project's own accounts and connections",
+          "status": "pending",
+          "description": "A project connects its own MCP servers (Linear, Jira, GitHub, any by URL), each signed in with the email used on that project, so two clients on two emails stay apart. Read-only: a daily sync brings the signed-in account's open items in as that project's tasks, and ask_project answers live through a sub-agent that sees only that project's tools. Minimal copy; leaving a project erases its tokens. Drafted 2026-10-12.",
+          "spec": "spec/in-progress/project-spaces.md"
         }
       ]
     },
@@ -504,6 +518,13 @@
           "spec": "android/app/src/main/java/com/sonu/spica/ui/home/HomePage.kt"
         },
         {
+          "id": "home-day-rail",
+          "title": "Home as your day",
+          "status": "in-progress",
+          "description": "Home on the phone becomes the day itself: the date and week on the ground, then a white sheet with what happened today at its time (spends, meals, habits, ticked tasks), Now, one Up next card, and the rest of today with round task boxes. Each row opens its widget as a sheet. The bell becomes a caret that slides in Today at a glance from the right: six key numbers and the nudges. One layer at a time. Built 2026-10-16 in the day look (Figtree, deepened mode colours), on trial on Home.",
+          "spec": "spec/home-day-rail.md"
+        },
+        {
           "id": "today-plan",
           "title": "Today's plan — meals and a workout on Home",
           "status": "in-progress",
@@ -530,6 +551,20 @@
           "status": "pending",
           "description": "Not export — that stays a no. But no-backup is the worse risk: a lost phone is years of ledger gone.",
           "spec": "spec/substrate.md"
+        },
+        {
+          "id": "reminders",
+          "title": "Reminders — at a time, or at a place",
+          "status": "pending",
+          "description": "Set in chat or on a Reminders page: at a time (once, daily, weekly, monthly), or on arriving at or leaving a pin — 'office se nikalte waqt laptop, charger, tiffin', shown as a list at the door. The phone is the clock: exact alarms and geofences fire offline, and where you are never leaves the phone. One tool, manage_reminder; a fired reminder is a reminder nudge. Drafted 2026-10-12.",
+          "spec": "spec/in-progress/reminders.md"
+        },
+        {
+          "id": "mood",
+          "title": "Mood — name a feeling, find what helps",
+          "status": "pending",
+          "description": "How you feel, as health data: said in chat or tapped on a Home widget as one of five states (Heavy, Uneasy, Okay, Calm, Bright) plus the person's own words. Then their choice: note it, calm down, talk it through, or what's behind this. Practices are fixed reviewed scripts with the Constellation as the breathing pacer, each rated Better, Same or Worse. Patterns are computed live across sleep, workouts, late tasks and late-night spending, said in counts with the rows behind them. No streaks, no scores, no character; a crisis writes nothing and shows Tele-MANAS. Drafted 2026-10-15.",
+          "spec": "spec/in-progress/mood.md"
         }
       ]
     }

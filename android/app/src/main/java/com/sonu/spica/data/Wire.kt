@@ -64,6 +64,8 @@ data class WireTx(
     val commitmentId: String? = null,
     val commitmentInferred: Boolean = false,
     val deletedAt: String? = null,
+    /** When it happened — Home's day rail places the row there. */
+    val occurredAt: String? = null,
 )
 
 @Serializable
@@ -78,6 +80,7 @@ data class WireMeal(
     val fatG: Num = null,
     val confidence: Double = 1.0,
     val deletedAt: String? = null,
+    val occurredAt: String? = null,
 )
 
 /** A meal write's answer: the row, and the pantry moves it caused. */
@@ -91,6 +94,7 @@ data class WireHabitLog(
     val localDay: String,
     val amount: Num = null,
     val note: String? = null,
+    val occurredAt: String? = null,
 )
 
 @Serializable

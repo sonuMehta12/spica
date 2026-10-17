@@ -684,7 +684,9 @@ async def t_log_day(session, user, *, local_day: str, **kw) -> dict:
             continue
         from app.schemas.writes import HabitLogIn
         row = await writes.create_habit_log(HabitLogIn(
-            id=new_id(), habit_id=habit.id, local_day=day, occurred_at=_at(day),
+            # The tick's moment: a clock they said, else their message's —
+            # Home's day rail places it there (spec/home-day-rail.md).
+            id=new_id(), habit_id=habit.id, local_day=day, occurred_at=_at(day, kw.get("time", "12:00:00")),
             amount=(h.get("amount") if isinstance(h, dict) else None),
             note=(h.get("note") if isinstance(h, dict) else None), source="manual",
         ), session, user, Response())
@@ -1655,7 +1657,7 @@ TOOLS: list[dict] = [
            "kind": {"type": "string",
                     "enum": ["expense", "income", "lent", "borrowed", "repayment", "transfer"]},
            "category": {"type": "string"}, "description": {"type": "string"},
-           "local_day": DATE, "time": {"type": "string", "description": "HH:MM:SS, local"},
+           "local_day": DATE, "time": {"type": "string", "description": "HH:MM:SS, local — only a clock time they said ('8 baje', 'subah 9 bje'); otherwise leave it out and the moment of their message is used"},
            "counterparty_name": {"type": "string"},
            "method": {"type": "string", "enum": ["cash", "digital"]},
            "note": {"type": "string"},
@@ -1748,7 +1750,7 @@ TOOLS: list[dict] = [
                                         "or a clarification they gave later"},
            "meal_type": {"type": "string",
                          "description": "Breakfast | Lunch | Snack | Dinner"},
-           "local_day": DATE, "time": {"type": "string"}, "note": {"type": "string"},
+           "local_day": DATE, "time": {"type": "string", "description": "HH:MM:SS, local — only a clock time they said ('8 baje', 'subah 9 bje'); otherwise leave it out and the moment of their message is used"}, "note": {"type": "string"},
            "dish_id": {"type": "string",
                        "description": "only when the dish is already known by id — skips "
                                       "resolution; text_said is then its name"},
@@ -1790,7 +1792,8 @@ TOOLS: list[dict] = [
           "weight they correct ('sorry 7 ghante soya tha') is this tool again with the "
           "right number: it replaces the day's value. A weight said as a guess — "
           "'around 72', '71 ke aas paas' — is approximate=true; a reading is not.",
-          {"local_day": DATE, "sleep_hours": {"type": "number"},
+          {"local_day": DATE, "time": {"type": "string", "description": "HH:MM:SS, local — only a clock time they said ('8 baje', 'subah 9 bje'); otherwise leave it out and the moment of their message is used"},
+           "sleep_hours": {"type": "number"},
            "weight_kg": {"type": "number"},
            "approximate": {"type": "boolean", "description": "true only when they gave "
                            "the weight as a guess; leave it out for a reading"},

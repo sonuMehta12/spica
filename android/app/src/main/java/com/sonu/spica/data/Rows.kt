@@ -62,6 +62,8 @@ data class HabitLogRow(
     val habit: String,
     val amount: Double? = null,
     val note: String? = null,
+    /** When it happened, if the server said. */
+    val at: java.time.Instant? = null,
 )
 
 data class PendingItem(

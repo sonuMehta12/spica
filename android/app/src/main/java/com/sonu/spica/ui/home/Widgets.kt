@@ -95,6 +95,13 @@ private val ACTIVITY = Badge(Ph.heartbeat, C.dietInk, C.dietTint)
 private val WORKOUT = Badge(Ph.barbell, C.dietInk, C.dietTint)
 private val HABITS = Badge(Ph.calendarBlank, C.dietInk, C.dietTint)
 
+/**
+ * Set inside a sheet that is already the card: the widget draws on the
+ * sheet's white with no card, shadow or corners of its own — one surface,
+ * not a card in a card.
+ */
+val LocalBareWidget = androidx.compose.runtime.compositionLocalOf { false }
+
 /** A widget's frame: its badge, name and window on top. With `onOpen`, the card opens its report. */
 @Composable
 private fun Widget(
@@ -105,14 +112,13 @@ private fun Widget(
     badge: Badge? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val bare = LocalBareWidget.current
     Column(
         Modifier
             .fillMaxWidth()
-            .then(S.widget(CardShape))
-            .clip(CardShape)
-            .background(C.white)
+            .then(if (bare) Modifier else Modifier.then(S.widget(CardShape)).clip(CardShape).background(C.white))
             .then(if (onOpen != null) Modifier.tap(onClick = onOpen) else Modifier)
-            .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 18.dp),
+            .padding(start = if (bare) 4.dp else 18.dp, end = if (bare) 4.dp else 18.dp, top = 16.dp, bottom = 18.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (badge != null) {

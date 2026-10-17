@@ -221,6 +221,29 @@ Paisa *Money*. Placeholder in the composer: *Say what happened…*. A state is
 copy too: *estimated*, not a word for it in another language — the dot says
 it.
 
+## The day look — on trial on Home
+
+Home's day rail and its glance panel (`spec/home-day-rail.md`) wear a look the
+design canvas settled in rows N–P, on the phone only (the web takes no UI
+changes). Everywhere else keeps the table above until this trial is decided.
+
+- **Face: Figtree** (`F.day`, `T.day`) — heavy (800) for the date, titles and
+  every number; 500–600 for the small grey lines. It draws ₹, the true minus
+  and tabular figures. Bundled in `res/font` like the others.
+- **Mode colours, deepened together**: `deepPaisa`, `deepDiet`, `deepWork` and
+  their `Ink`, `Soft`, `Mist`, `Tint` stops — OKLCH L 0.52, C 0.117 for base,
+  the same lightness and chroma for all three, so the hue still says which and
+  none reads more urgent. A done row's node is solid base with a white glyph
+  (5 : 1 or better); a planned one is mist with the glyph in base. Habits use
+  `deepHabit`, the neutral — counted, never judged.
+- **The date heading** is the face's heavy sans here, not the serif: on this
+  page nothing the agent says is on screen.
+- **Shapes**: the day's sheet rises over the ground with 32 corners at the
+  top; cards 28, tiles 20, pills and nodes round.
+
+If the trial holds, these replace Anek Latin and the current mode stops in one
+change, on both token files, and this section folds into the ones above.
+
 ## Checklist — before you say a UI change is done
 
 - [ ] No hex, no font name, no shadow value outside the token files.

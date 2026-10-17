@@ -71,6 +71,7 @@ object Api {
         credit = t.direction == "credit",
         deleted = t.deletedAt != null,
         kind = t.kind,
+        at = instantOf(t.occurredAt),
     )
 
     private fun toMeal(m: WireMeal) = Meal(
@@ -85,6 +86,7 @@ object Api {
         confidence = m.confidence,
         date = m.localDay,
         deleted = m.deletedAt != null,
+        at = instantOf(m.occurredAt),
     )
 
     /** A source is free text on the wire; the known ones get their proper name. */
@@ -115,6 +117,7 @@ object Api {
             // `done_at` is an instant, read in the device's timezone; `due` is
             // already a plain local day.
             doneOn = t.doneAt?.let(Day::localDayOf),
+            doneAt = instantOf(t.doneAt),
             project = t.projectId,
             projectGuessed = t.projectGuessed,
             due = t.due,
@@ -198,6 +201,7 @@ object Api {
                 HabitLogRow(
                     id = it.id, day = dayOf(it.localDay), date = it.localDay,
                     habit = habitName[it.habitId] ?: "?", amount = it.amount, note = it.note,
+                    at = instantOf(it.occurredAt),
                 )
             },
             sleep = d.diet.days.filter { it.sleepHours != null }.map { Triple(dayOf(it.localDay), it.localDay, it.sleepHours!!) },
